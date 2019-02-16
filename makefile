@@ -6,7 +6,7 @@ LDFLAGS = libisentlib.a  -lm -lglut -lGL -lX11
 # For macOS, comment the preceding command line (put a # at the beginning)
 # and uncomment the following command line:
 #LDFLAGS = libisentlib.a -framework OpenGL -framework GLUT
-TARGET = bots
+TARGET = simulation
 
 .PHONY: clean deepclean
 
