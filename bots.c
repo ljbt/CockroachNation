@@ -150,7 +150,7 @@ void updateSwarm(Bot *swarm, const int swarmSize, int predatorAbscissa, int pred
 					if (closerIndex != i) {
 						const double sumX = -(swarm[closerIndex].x-swarm[i].x)/closerDistance*WeightOfEscape+(1.-WeightOfEscape)*cos(swarm[i].speedTheta)*swarm[i].speedRho;
 						const double sumY = -(swarm[closerIndex].y-swarm[i].y)/closerDistance*WeightOfEscape+(1.-WeightOfEscape)*sin(swarm[i].speedTheta)*swarm[i].speedRho;
-						//swarm[i].speedTheta = atan2(sumY, sumX);
+						swarm[i].speedTheta = atan2(sumY, sumX);
 					}
 				}
 				if (predatorAbscissa >= 0 && predatorOrdinate >= 0) {
