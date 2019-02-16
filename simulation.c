@@ -37,7 +37,7 @@ const double Bubble = 5.;			// A minimal distance between cockroachs
 const double WeightOfEscape = .8;
 const double WeightOfMimic = .3;
 const double MimicHorizon = 30.;		// Units to look for neighbors to mimic
-const double PredatorBubble = 20.;		// A minimal distance with the predator
+const double PredatorBubble = 40.;		// A minimal distance with the predator
 const double WeightOfPredatorEscape = .8;
 
 enum {RandomWalker, SimpleCockroach} mode = SimpleCockroach /*RandomWalker*/;
@@ -104,7 +104,7 @@ void updateSwarm(Cockroach *swarm, const int swarmSize, int predatorAbscissa, in
 						sumX = sumX/normalization*WeightOfNeighbors+(1.-WeightOfNeighbors)*cos(swarm[i].speedTheta)*swarm[i].speedRho;
 						sumY = sumY/normalization*WeightOfNeighbors+(1.-WeightOfNeighbors)*sin(swarm[i].speedTheta)*swarm[i].speedRho;
 						normalization = hypot(sumX, sumY);
-						swarm[i].speedTheta = atan2(sumY/normalization, sumX/normalization);
+						//swarm[i].speedTheta = atan2(sumY/normalization, sumX/normalization);
 					}
 				}
 				{
@@ -203,7 +203,7 @@ void gestionEvenement(EvenementGfx event) {
 
 		case Affichage:
 			effaceFenetre (0, 0, 0);
-			couleurCourante(150, 0, 0);
+			couleurCourante(255, 246, 56); 
 			if (displayPredator)
 				circle(abscisseSouris(), ordonneeSouris(), PredatorBubble);
 			displaySwarm(cockroach, NumberOfCockroachs);
