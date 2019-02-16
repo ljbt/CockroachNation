@@ -37,8 +37,9 @@ const double Bubble = 5.;			// A minimal distance between cockroachs
 const double WeightOfEscape = .8;
 const double WeightOfMimic = .3;
 const double MimicHorizon = 30.;		// Units to look for neighbors to mimic
-const double PredatorBubble = 40.;		// A minimal distance with the predator
+const double PredatorBubble = 20.;		// A minimal distance with the predator
 const double WeightOfPredatorEscape = .8;
+const double MinDistanceFromBoxEdges = 10.;// A minimal distance with the edges of the box
 
 enum {RandomWalker, SimpleCockroach} mode = SimpleCockroach /*RandomWalker*/;
 
@@ -153,16 +154,51 @@ void updateSwarm(Cockroach *swarm, const int swarmSize, int predatorAbscissa, in
 						swarm[i].speedTheta = atan2(sumY, sumX);
 					}
 				}
-				if (predatorAbscissa >= 0 && predatorOrdinate >= 0) {
+				{
 					// Rule 4: avoid the predator
-					const double deltaX = predatorAbscissa-swarm[i].x;
-					const double deltaY = predatorOrdinate-swarm[i].y;
-					const double hypotenuse = hypot(deltaX, deltaY);
-					if (hypotenuse < PredatorBubble) {
-						const double sumX = -(predatorAbscissa-swarm[i].x)/hypotenuse*WeightOfPredatorEscape+(1.-WeightOfPredatorEscape)*cos(swarm[i].speedTheta)*swarm[i].speedRho;
-						const double sumY = -(predatorOrdinate-swarm[i].y)/hypotenuse*WeightOfPredatorEscape+(1.-WeightOfPredatorEscape)*sin(swarm[i].speedTheta)*swarm[i].speedRho;
-						//swarm[i].speedTheta = atan2(sumY, sumX);
+					if (predatorAbscissa >= 0 && predatorOrdinate >= 0) {
+						const double deltaX = predatorAbscissa-swarm[i].x;
+						const double deltaY = predatorOrdinate-swarm[i].y;
+						const double hypotenuse = hypot(deltaX, deltaY);
+						if (hypotenuse < PredatorBubble) {
+							const double sumX = -(predatorAbscissa-swarm[i].x)/hypotenuse*WeightOfPredatorEscape+(1.-WeightOfPredatorEscape)*cos(swarm[i].speedTheta)*swarm[i].speedRho;
+							const double sumY = -(predatorOrdinate-swarm[i].y)/hypotenuse*WeightOfPredatorEscape+(1.-WeightOfPredatorEscape)*sin(swarm[i].speedTheta)*swarm[i].speedRho;
+							//swarm[i].speedTheta = atan2(sumY, sumX);
+						}
 					}
+				}
+				{
+					// Rule 5: stay in the box
+					bool tooClose = false;
+					double sumX = -0.;
+					double sumY = -0.;
+					const double deltaX = WindowWidth-swarm[i].x;
+					const double deltaY = WindowHeight-swarm[i].y;
+					//const double hypotenuse = hypot(deltaX, deltaY);
+					if (deltaX < MinDistanceFromBoxEdges) 
+					{
+						tooClose = true;
+						sumX = (MinDistanceFromBoxEdges-swarm[i].x)/swarm[i].x*WeightOfEscape+(1.-WeightOfEscape)*cos(swarm[i].speedTheta)*swarm[i].speedRho;
+
+					}
+					else if (deltaX > WindowWidth-MinDistanceFromBoxEdges) 
+					{
+						tooClose = true;
+						sumX = (( WindowWidth-MinDistanceFromBoxEdges)-swarm[i].x)/swarm[i].x*WeightOfEscape+(1.-WeightOfEscape)*cos(swarm[i].speedTheta)*swarm[i].speedRho;
+
+					}
+					if (deltaY < MinDistanceFromBoxEdges) 
+					{
+						tooClose = true;
+						sumY = (MinDistanceFromBoxEdges-swarm[i].y)/swarm[i].y*WeightOfEscape+(1.-WeightOfEscape)*sin(swarm[i].speedTheta)*swarm[i].speedRho;
+					}
+					else if (deltaY > WindowHeight-MinDistanceFromBoxEdges) 
+					{
+						tooClose = true;
+						sumY = ((WindowHeight-MinDistanceFromBoxEdges)-swarm[i].y)/swarm[i].y*WeightOfEscape+(1.-WeightOfEscape)*sin(swarm[i].speedTheta)*swarm[i].speedRho;
+					}
+					if(tooClose)
+						swarm[i].speedTheta = atan2(sumY, sumX);
 				}
 				break;
 		}
@@ -203,7 +239,7 @@ void gestionEvenement(EvenementGfx event) {
 
 		case Affichage:
 			effaceFenetre (0, 0, 0);
-			couleurCourante(255, 246, 56); 
+			couleurCourante(150, 0, 0);
 			if (displayPredator)
 				circle(abscisseSouris(), ordonneeSouris(), PredatorBubble);
 			displaySwarm(cockroach, NumberOfCockroachs);
