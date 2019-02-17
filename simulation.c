@@ -267,7 +267,7 @@ void gestionEvenement(EvenementGfx event) {
 		case Souris:
 			if (displayPredator) {
 				predatorAbscissa = abscisseSouris();
-				predatorOrdinate = ordonneeSouris();
+				predatorOrdinate = ordonneeSouris();   
 			}
 			else {
 				predatorAbscissa = -1;
@@ -275,9 +275,9 @@ void gestionEvenement(EvenementGfx event) {
 			}
 			break;
 
-		case ClavierSpecial:
+		case ClavierSpecial: 
 		case Inactivite:
-		case Redimensionnement:
+		case Redimensionnement: 
 			break;
 	}
 }

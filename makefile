@@ -11,7 +11,7 @@ TARGET = simulation
 .PHONY: clean deepclean
 
 $(TARGET): $(TARGET).o libisentlib.a
-	$(CC) -o $@ $^ $(LDFLAGS)
+	$(CC) -o $@.exe $^ $(LDFLAGS)
 
 $(TARGET).o: $(TARGET).c
 	$(CC) $(CFLAGS) $<
