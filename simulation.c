@@ -130,7 +130,7 @@ void updateSwarm(Cockroach *swarm, const int swarmSize, int predatorAbscissa, in
 						const double normalization = hypot(sumX, sumY);
 						sumX = sumX/normalization*WeightOfMimic+(1.-WeightOfMimic)*cos(swarm[i].speedTheta)*swarm[i].speedRho;
 						sumY = sumY/normalization*WeightOfMimic+(1.-WeightOfMimic)*sin(swarm[i].speedTheta)*swarm[i].speedRho;
-						//swarm[i].speedTheta = atan2(sumY, sumX);
+						swarm[i].speedTheta = atan2(sumY, sumX);
 					}
 				}
 				{
