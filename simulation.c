@@ -97,7 +97,7 @@ void updateSwarm(Cockroach *swarm, const int swarmSize, int lightAbscissa, int l
 				break;
 			case SimpleCockroach:
 				{
-					// Rule 1: avoid being alone
+					/// Rule 1: avoid being alone
 					double sumX = -0.;
 					double sumY = -0.;
 					int neighbors = 0;
