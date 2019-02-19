@@ -3,12 +3,41 @@
 #include <math.h>		// For sin() and cos()
 #include <strings.h>	// For bzero()
 #include <stdbool.h>
+#include <time.h>
+
 #include "GfxLib.h"		// To do simple graphics
 #include "ESLib.h"		// For valeurAleatoire()
+
+#include "definitions.h"
+#include "positionFood.h"
 
 #ifndef M_PI
 #define M_PI 3.141592654
 #endif
+
+#define NumberOfCockroachs 30
+const double PowerForWeights = 3;	// To decrease or increase the influence of the distance
+const double Horizon = 300.;		// Units to look for neighbors
+const double WeightOfNeighbors = .1;
+const double Bubble = 5.;			// A minimal distance between cockroachs
+const double WeightOfEscape = .8;
+const double WeightOfMimic = .3;
+const double MimicHorizon = 30.;		// Units to look for neighbors to mimic
+const double lightBubble = 100.;		// A minimal distance with the light
+const double foodBubble = 50.;		// food area distance
+const int nb_max_foodPoints = 4;
+const double WeightOflightEscape = .8;
+const double MinDistanceFromBoxEdges = 10.;// A minimal distance with the edges of the box
+
+enum {RandomWalker, SimpleCockroach} mode = SimpleCockroach /*RandomWalker*/;
+
+typedef struct {
+	float x;
+	float y;
+	float speedRho;
+	float speedTheta;
+} Cockroach;
+
 
 // To draw a circle
 void circle(float xCenter, float yCenter, float radius)
@@ -26,29 +55,14 @@ void circle(float xCenter, float yCenter, float radius)
 	}
 }
 
-// Default width and height
-#define WindowWidth 600
-#define WindowHeight 600
-#define NumberOfCockroachs 300
-const double PowerForWeights = 3;	// To decrease or increase the influence of the distance
-const double Horizon = 300.;		// Units to look for neighbors
-const double WeightOfNeighbors = .1;
-const double Bubble = 5.;			// A minimal distance between cockroachs
-const double WeightOfEscape = .8;
-const double WeightOfMimic = .3;
-const double MimicHorizon = 30.;		// Units to look for neighbors to mimic
-const double PredatorBubble = 40.;		// A minimal distance with the predator
-const double WeightOfPredatorEscape = .8;
-const double MinDistanceFromBoxEdges = 10.;// A minimal distance with the edges of the box
+void displayFood(POINT* foodPoints, int nb_foodPoints)
+{
+	couleurCourante(51,102,0);
+    for(int i=0; i<nb_foodPoints; ++i){
+        circle(foodPoints[i].x,foodPoints[i].y,foodBubble);
+    }
+}
 
-enum {RandomWalker, SimpleCockroach} mode = SimpleCockroach /*RandomWalker*/;
-
-typedef struct {
-	float x;
-	float y;
-	float speedRho;
-	float speedTheta;
-} Cockroach;
 
 Cockroach *initializeSwarm(const int swarmSize) {
 	Cockroach *swarm = (Cockroach*)calloc(swarmSize, sizeof(Cockroach));
@@ -75,7 +89,7 @@ void displaySwarm(const Cockroach *swarm, const int swarmSize) {
 		point(swarm[i].x, swarm[i].y);//, 1);
 }
 
-void updateSwarm(Cockroach *swarm, const int swarmSize, int predatorAbscissa, int predatorOrdinate) {
+void updateSwarm(Cockroach *swarm, const int swarmSize, int lightAbscissa, int lightOrdinate) {
 	for (int i = 0; i < swarmSize; ++i) {	// All the individuals
 		switch (mode) {
 			case RandomWalker:
@@ -130,7 +144,7 @@ void updateSwarm(Cockroach *swarm, const int swarmSize, int predatorAbscissa, in
 						const double normalization = hypot(sumX, sumY);
 						sumX = sumX/normalization*WeightOfMimic+(1.-WeightOfMimic)*cos(swarm[i].speedTheta)*swarm[i].speedRho;
 						sumY = sumY/normalization*WeightOfMimic+(1.-WeightOfMimic)*sin(swarm[i].speedTheta)*swarm[i].speedRho;
-						//swarm[i].speedTheta = atan2(sumY, sumX);
+						swarm[i].speedTheta = atan2(sumY, sumX);
 					}
 				}
 				{
@@ -155,15 +169,15 @@ void updateSwarm(Cockroach *swarm, const int swarmSize, int predatorAbscissa, in
 					}
 				}
 				{
-					// Rule 4: avoid the predator
-					if (predatorAbscissa >= 0 && predatorOrdinate >= 0) {
-						const double deltaX = predatorAbscissa-swarm[i].x;
-						const double deltaY = predatorOrdinate-swarm[i].y;
+					// Rule 4: avoid the light
+					if (lightAbscissa >= 0 && lightOrdinate >= 0) {
+						const double deltaX = lightAbscissa-swarm[i].x;
+						const double deltaY = lightOrdinate-swarm[i].y;
 						const double hypotenuse = hypot(deltaX, deltaY);
-						if (hypotenuse < PredatorBubble) {
-							const double sumX = -(predatorAbscissa-swarm[i].x)/hypotenuse*WeightOfPredatorEscape+(1.-WeightOfPredatorEscape)*cos(swarm[i].speedTheta)*swarm[i].speedRho;
-							const double sumY = -(predatorOrdinate-swarm[i].y)/hypotenuse*WeightOfPredatorEscape+(1.-WeightOfPredatorEscape)*sin(swarm[i].speedTheta)*swarm[i].speedRho;
-							//swarm[i].speedTheta = atan2(sumY, sumX);
+						if (hypotenuse < lightBubble) {
+							const double sumX = -(lightAbscissa-swarm[i].x)/hypotenuse*WeightOflightEscape+(1.-WeightOflightEscape)*cos(swarm[i].speedTheta)*swarm[i].speedRho;
+							const double sumY = -(lightOrdinate-swarm[i].y)/hypotenuse*WeightOflightEscape+(1.-WeightOflightEscape)*sin(swarm[i].speedTheta)*swarm[i].speedRho;
+							swarm[i].speedTheta = atan2(sumY, sumX);
 						}
 					}
 				}
@@ -174,7 +188,6 @@ void updateSwarm(Cockroach *swarm, const int swarmSize, int predatorAbscissa, in
 					double sumY = -0.;
 					const double deltaX = WindowWidth-swarm[i].x;
 					const double deltaY = WindowHeight-swarm[i].y;
-					//const double hypotenuse = hypot(deltaX, deltaY);
 					if (deltaX < MinDistanceFromBoxEdges) 
 					{
 						tooClose = true;
@@ -222,26 +235,35 @@ int main(int argc, char *argv[]) {
 
 void gestionEvenement(EvenementGfx event) {
 	static Cockroach *cockroach = NULL;
-	static bool displayPredator = false;
-	static int predatorAbscissa = -1;
-	static int predatorOrdinate = -1;
+	static bool displaylight = false;
+	static int lightAbscissa = -1;
+	static int lightOrdinate = -1;
+
+	static int nb_foodPoints;
+	static POINT *foodPoints = NULL; 
 	
 	switch (event) {
 		case Initialisation:
+			srand(time(NULL)); //seed initialization for random values
 			demandeTemporisation(20);
 			cockroach = initializeSwarm(NumberOfCockroachs);
+			nb_foodPoints = rand_a_b(1,nb_max_foodPoints+1);
+			foodPoints = positionsFoodAreas(nb_foodPoints);
 			break;
 
 		case Temporisation:
-			updateSwarm(cockroach, NumberOfCockroachs, predatorAbscissa, predatorOrdinate);
+			updateSwarm(cockroach, NumberOfCockroachs, lightAbscissa, lightOrdinate);
 			rafraichisFenetre();
 			break;
 
 		case Affichage:
 			effaceFenetre (255, 255, 255);
-			couleurCourante(255, 235, 0);
-			if (displayPredator)
-				circle(abscisseSouris(), ordonneeSouris(), PredatorBubble);
+			displayFood(foodPoints,nb_foodPoints);
+			if (displaylight)
+			{
+				couleurCourante(255, 235, 0);
+				circle(abscisseSouris(), ordonneeSouris(), lightBubble);
+			}
 			displaySwarm(cockroach, NumberOfCockroachs);
 			break;
 
@@ -261,17 +283,17 @@ void gestionEvenement(EvenementGfx event) {
 
 		case BoutonSouris:
 			if (etatBoutonSouris() == GaucheAppuye)
-				displayPredator = true;
+				displaylight = true;
 			else if (etatBoutonSouris() == GaucheRelache)
-				displayPredator = false;
+				displaylight = false;
 		case Souris:
-			if (displayPredator) {
-				predatorAbscissa = abscisseSouris();
-				predatorOrdinate = ordonneeSouris();   
+			if (displaylight) {
+				lightAbscissa = abscisseSouris();
+				lightOrdinate = ordonneeSouris();   
 			}
 			else {
-				predatorAbscissa = -1;
-				predatorOrdinate = -1;
+				lightAbscissa = -1;
+				lightOrdinate = -1;
 			}
 			break;
 

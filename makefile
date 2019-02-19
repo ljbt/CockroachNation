@@ -10,11 +10,15 @@ TARGET = simulation
 
 .PHONY: clean deepclean
 
-$(TARGET): $(TARGET).o libisentlib.a
+$(TARGET): $(TARGET).o libisentlib.a positionFood.o
 	$(CC) -o $@.exe $^ $(LDFLAGS)
 
-$(TARGET).o: $(TARGET).c
+$(TARGET).o: $(TARGET).c definitions.h positionFood.h
 	$(CC) $(CFLAGS) $<
+
+
+positionFood.o: positionFood.c definitions.h positionFood.h
+	gcc -Wall -O2 -c positionFood.c
 
 libisentlib.a: BmpLib.o ErreurLib.o ESLib.o GfxLib.o OutilsLib.o SocketLib.o ThreadLib.o TortueLib.o VectorLib.o WavLib.o
 	ar r libisentlib.a BmpLib.o ErreurLib.o ESLib.o GfxLib.o OutilsLib.o SocketLib.o ThreadLib.o TortueLib.o VectorLib.o WavLib.o
