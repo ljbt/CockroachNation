@@ -258,12 +258,12 @@ void gestionEvenement(EvenementGfx event) {
 
 		case Affichage:
 			effaceFenetre (255, 255, 255);
-			displayFood(foodPoints,nb_foodPoints);
 			if (displaylight)
 			{
 				couleurCourante(255, 235, 0);
 				circle(abscisseSouris(), ordonneeSouris(), lightBubble);
 			}
+			displayFood(foodPoints,nb_foodPoints);
 			displaySwarm(cockroach, NumberOfCockroachs);
 			break;
 
