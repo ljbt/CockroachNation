@@ -10,16 +10,21 @@ TARGET = simulation
 
 .PHONY: clean deepclean
 
-$(TARGET): $(TARGET).o libisentlib.a positionFood.o
+$(TARGET): $(TARGET).o libisentlib.a positionFood.o evolution.o
 	$(CC) -o $@.exe $^ $(LDFLAGS)
 
-$(TARGET).o: $(TARGET).c definitions.h positionFood.h
+$(TARGET).o: $(TARGET).c definitions.h positionFood.h evolution.h
 	$(CC) $(CFLAGS) $<
 
 
 positionFood.o: positionFood.c definitions.h positionFood.h
-	gcc -Wall -O2 -c positionFood.c
+	gcc $(CFLAGS) $<
 
+evolution.o: evolution.c definitions.h evolution.h
+	$(CC) $(CFLAGS) $< 
+
+
+# isen libs ------------------------------------
 libisentlib.a: BmpLib.o ErreurLib.o ESLib.o GfxLib.o OutilsLib.o SocketLib.o ThreadLib.o TortueLib.o VectorLib.o WavLib.o
 	ar r libisentlib.a BmpLib.o ErreurLib.o ESLib.o GfxLib.o OutilsLib.o SocketLib.o ThreadLib.o TortueLib.o VectorLib.o WavLib.o
 	ranlib libisentlib.a
@@ -59,6 +64,7 @@ WavLib.o: WavLib.c WavLib.h OutilsLib.h
 # For macOS, comment the preceding command line (put a # at the beginning)
 # and uncomment the following command line:
 #	gcc -Wall -O2 -c WavLib.c
+# ----------------------------------------------
 
 zip:
 	tar -cvzf $(TARGET).tgz *.[ch] *.pdf makefile

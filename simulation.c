@@ -10,12 +10,13 @@
 
 #include "definitions.h"
 #include "positionFood.h"
+#include "evolution.h"
 
 #ifndef M_PI
 #define M_PI 3.141592654
 #endif
 
-#define NumberOfCockroachs 30
+int NumberOfCockroachs = 30;
 const double PowerForWeights = 3;	// To decrease or increase the influence of the distance
 const double Horizon = 100.;		// Units to look for neighbors
 const double WeightOfNeighbors = .1;
@@ -30,7 +31,11 @@ const double WeightOfFoodApproach = .3;
 const double WeightOflightEscape = .8;
 const double MinDistanceFromBoxEdges = 1.;// A minimal distance with the edges of the box
 
-enum {RandomWalker, SimpleCockroach} mode = SimpleCockroach /*RandomWalker*/;
+const double Speed_of_digestion = .1; //when the cockroach walks he digests
+const double Speed_of_exctinction = .1; // when the cockroach has to survive he looses life
+
+
+//enum {RandomWalker, SimpleCockroach} mode = SimpleCockroach /*RandomWalker*/;
 
 
 // To draw a circle
@@ -60,7 +65,7 @@ void create_and_displayFood(POINT* foodPoints, int nb_foodPoints)
 }
 
 
-Cockroach *initializeSwarm(const int swarmSize) {
+Cockroach *initializeSwarm(int swarmSize) {
 	Cockroach *swarm = (Cockroach*)calloc(swarmSize, sizeof(Cockroach));
 	//const double GroupSpeedTheta = 0.;//valeurAleatoire()*2.*M_PI;
 	for (int i = 0; i < swarmSize; ++i) {
@@ -73,21 +78,25 @@ Cockroach *initializeSwarm(const int swarmSize) {
 			.y = y,
 			.speedRho = 1.,
 			.speedTheta = valeurAleatoire()*2.*M_PI,	// GroupSpeedTheta
+			swarm[i].mode = Walking,
+			.capacity_to_eat = 0,
+			.capacity_to_avoid_light = 0,
+			.capacity_to_survive = rand_a_b(90,200), //random capacity to survive for each cockroach
 		};
-		swarm[i].mode = Walking;
+		
 	}
 	return swarm;
 }
 
-void displaySwarm(const Cockroach *swarm, const int swarmSize) {
+void displaySwarm(const Cockroach *swarm, int swarmSize) {
 	epaisseurDeTrait(2);
 	couleurCourante(0, 0, 0);
 	for (int i = 0; i < swarmSize; ++i)
 		point(swarm[i].x, swarm[i].y);//, 1);
 }
 
-void updateSwarm(Cockroach *swarm, const int swarmSize, int lightAbscissa, int lightOrdinate, int nb_foodPoints, POINT *foodPoints) {
-	for (int i = 0; i < swarmSize; ++i) {	// All the individuals
+void updateSwarm(Cockroach *swarm, int *swarmSize, int lightAbscissa, int lightOrdinate, int nb_foodPoints, POINT *foodPoints) {
+	for (int i = 0; i < *swarmSize; ++i) {	// All the individuals
 		switch (swarm[i].mode) {
 			case Eating:
 				
@@ -117,11 +126,30 @@ void updateSwarm(Cockroach *swarm, const int swarmSize, int lightAbscissa, int l
 				break;
 			case Walking:
 				{
+					/*Rule of beeing alive: if he walks he looses food energy, 
+					if hs no more food energy he has to survive, 
+					then if he hasnt energy to survive he dies */
+					if(swarm[i].capacity_to_eat > 0)
+						swarm[i].capacity_to_eat -= Speed_of_digestion;
+					else if(swarm[i].capacity_to_eat <= 0 && swarm[i].capacity_to_survive > 0)
+						swarm[i].capacity_to_survive -= Speed_of_exctinction;
+					else if (swarm[i].capacity_to_eat <= 0 && swarm[i].capacity_to_survive <= 0)
+					{
+						printf("hey number %d died bro\n", i);
+						adios(swarm, swarmSize, i); //death of little cockroach
+						printf("%d cockroach left\n", *swarmSize);
+					}
+					if(*swarmSize == 0)
+					{
+						printf("Everybody died... :(\n");
+						exit(0);
+					}	
+
 					/// Rule 1: avoid being alone
 					double sumX = -0.;
 					double sumY = -0.;
 					int neighbors = 0;
-					for (int n = 0; n < swarmSize; ++n) {	// All the neighbors
+					for (int n = 0; n < *swarmSize; ++n) {	// All the neighbors
 						if (i != n) {
 							const double deltaX = swarm[n].x-swarm[i].x;
 							const double deltaY = swarm[n].y-swarm[i].y;
@@ -147,7 +175,7 @@ void updateSwarm(Cockroach *swarm, const int swarmSize, int lightAbscissa, int l
 					double sumX = -0.;
 					double sumY = -0.;
 					int models = 0;
-					for (int n = 0; n < swarmSize; ++n) {	// All the neighbors
+					for (int n = 0; n < *swarmSize; ++n) {	// All the neighbors
 						if (i != n) {
 							const double deltaX = swarm[n].x-swarm[i].x;
 							const double deltaY = swarm[n].y-swarm[i].y;
@@ -172,7 +200,7 @@ void updateSwarm(Cockroach *swarm, const int swarmSize, int lightAbscissa, int l
 					// Rule 2: don't move too close
 					double closerDistance = INFINITY;
 					int closerIndex = i;
-					for (int n = 0; n < swarmSize; ++n) {	// All the neighbors
+					for (int n = 0; n < *swarmSize; ++n) {	// All the neighbors
 						if (i != n) {
 							const double deltaX = swarm[n].x-swarm[i].x;
 							const double deltaY = swarm[n].y-swarm[i].y;
@@ -251,7 +279,7 @@ void updateSwarm(Cockroach *swarm, const int swarmSize, int lightAbscissa, int l
 		}
 	}
 	// Update position
-	for (int i = 0; i < swarmSize; ++i) {
+	for (int i = 0; i < *swarmSize; ++i) {
 		swarm[i].x += swarm[i].speedRho*cos(swarm[i].speedTheta);
 		swarm[i].y += swarm[i].speedRho*sin(swarm[i].speedTheta);
 	}
@@ -286,7 +314,7 @@ void gestionEvenement(EvenementGfx event) {
 			break;
 
 		case Temporisation:
-			updateSwarm(cockroach, NumberOfCockroachs, lightAbscissa, lightOrdinate, nb_foodPoints, foodPoints);
+			updateSwarm(cockroach, &NumberOfCockroachs, lightAbscissa, lightOrdinate, nb_foodPoints, foodPoints);
 			rafraichisFenetre();
 			break;
 
