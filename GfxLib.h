@@ -44,7 +44,7 @@
 //		le main manquant dans chaque programme, a partir du code suivant :
 //int main(int argc, char **argv)
 //{	initialiseGLUT(argc, argv);
-//	gfxMain();
+//	gfxMain(); 
 //	return 0;}
 //
 //	Version 2.0 (29/01/06) : ajout de la gestion de la 3D

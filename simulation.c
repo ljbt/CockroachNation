@@ -35,8 +35,6 @@ const double Speed_of_digestion = .1; //when the cockroach walks he digests
 const double Speed_of_exctinction = .1; // when the cockroach has to survive he looses life
 
 
-//enum {RandomWalker, SimpleCockroach} mode = SimpleCockroach /*RandomWalker*/;
-
 
 // To draw a circle
 void circle(float xCenter, float yCenter, float radius)
@@ -64,10 +62,19 @@ void create_and_displayFood(POINT* foodPoints, int nb_foodPoints)
     }
 }
 
+/* function that return a random gender (male or female)
+	for swarm initialization */
+Gender alea_gender()
+{
+	int g = rand_a_b(0,2); // generate a 0 or a 1
+	if (g == 0)
+		return Male;
+	else
+		return Female;
+}
 
 Cockroach *initializeSwarm(int swarmSize) {
 	Cockroach *swarm = (Cockroach*)calloc(swarmSize, sizeof(Cockroach));
-	//const double GroupSpeedTheta = 0.;//valeurAleatoire()*2.*M_PI;
 	for (int i = 0; i < swarmSize; ++i) {
 		const double theta = valeurAleatoire()*2.*M_PI;
 		const double rho = sqrt(valeurAleatoire()*pow(fmin(WindowWidth/2., WindowHeight/2.), 2));
@@ -78,10 +85,11 @@ Cockroach *initializeSwarm(int swarmSize) {
 			.y = y,
 			.speedRho = 1.,
 			.speedTheta = valeurAleatoire()*2.*M_PI,	// GroupSpeedTheta
-			swarm[i].mode = Walking,
+			.gender = alea_gender(), // male or female
+			.mode = Walking, //walking by default
 			.capacity_to_eat = 0,
 			.capacity_to_avoid_light = 0,
-			.capacity_to_survive = rand_a_b(90,200), //random capacity to survive for each cockroach
+			.capacity_to_survive = rand_a_b(90,200), //random capacity to survive without food for each cockroach
 		};
 		
 	}
@@ -127,7 +135,7 @@ void updateSwarm(Cockroach *swarm, int *swarmSize, int lightAbscissa, int lightO
 			case Walking:
 				{
 					/*Rule of beeing alive: if he walks he looses food energy, 
-					if hs no more food energy he has to survive, 
+					if no more food energy he has to survive, 
 					then if he hasnt energy to survive he dies */
 					if(swarm[i].capacity_to_eat > 0)
 						swarm[i].capacity_to_eat -= Speed_of_digestion;
@@ -135,7 +143,7 @@ void updateSwarm(Cockroach *swarm, int *swarmSize, int lightAbscissa, int lightO
 						swarm[i].capacity_to_survive -= Speed_of_exctinction;
 					else if (swarm[i].capacity_to_eat <= 0 && swarm[i].capacity_to_survive <= 0)
 					{
-						printf("hey number %d died bro\n", i);
+						printf("RIP number %d\n", i);
 						adios(swarm, swarmSize, i); //death of little cockroach
 						printf("%d cockroach left\n", *swarmSize);
 					}
