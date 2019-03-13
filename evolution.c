@@ -18,3 +18,12 @@ void adios(Cockroach *swarm, int *swarmSize, int idx_death)
     (*swarmSize)--;
 }
 
+void cockroach_evolution(Cockroach *insect,int num_insect, int day)
+{
+    if(insect->adult_date == day && insect->growth == Larva) // larva to adult
+    {   
+        insect->growth = Adult;
+        printf("%d is now a %s adult, let's fuck !\n", insect->id, getGenderName(insect->gender));
+        insect->time_for_reproduction = true;
+    }
+}

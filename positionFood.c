@@ -1,20 +1,21 @@
 #include <stdlib.h>		// For exit()
 #include <stdio.h>		// For printf()
 #include <math.h>		//
+#include "GfxLib.h"		// To do simple graphics
 
 #include "definitions.h"
 #include "positionFood.h"
 
-//valeur entiere aleatoire dans [a;b[
-int rand_a_b(int a, int b){
-
-    return rand()%(b-a)+a ;
-}
-
-void affichePoint(POINT p)
+void create_and_displayFood(POINT* foodPoints, int nb_foodPoints)
 {
-	printf("x = %d , y = %d\n", p.x, p.y);
+	couleurCourante(51,102,0);
+    for(int i=0; i<nb_foodPoints; ++i){
+		if (foodPoints[i].rayon < 2.)
+			foodPoints[i] = positionFoodArea();
+        circle(foodPoints[i].x,foodPoints[i].y,round(foodPoints[i].rayon));
+    }
 }
+
 
 POINT positionFoodArea(void)
 {

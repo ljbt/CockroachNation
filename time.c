@@ -10,7 +10,7 @@
 #include "definitions.h"
 #include "time.h"
 
-#define MAX_ITERATION 1e2
+#define MAX_ITERATION 1e3
 
 void computes_day(int *day, int *num_iteration)
 {

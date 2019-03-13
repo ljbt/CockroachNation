@@ -10,7 +10,7 @@ TARGET = simulation
 
 .PHONY: clean deepclean
 
-$(TARGET): $(TARGET).o libisentlib.a positionFood.o evolution.o time.o
+$(TARGET): $(TARGET).o libisentlib.a positionFood.o evolution.o time.o reproduction.o
 	$(CC) -o $@.exe $^ $(LDFLAGS)
 
 $(TARGET).o: $(TARGET).c definitions.h positionFood.h evolution.h time.h
@@ -24,6 +24,9 @@ evolution.o: evolution.c definitions.h evolution.h
 	$(CC) $(CFLAGS) $< 
 
 time.o: time.c definitions.h time.h
+	$(CC) $(CFLAGS) $< 
+
+reproduction.o: reproduction.c definitions.h reproduction.h
 	$(CC) $(CFLAGS) $< 
 
 # isen libs ------------------------------------
