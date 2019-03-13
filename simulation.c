@@ -11,6 +11,7 @@
 #include "definitions.h"
 #include "positionFood.h"
 #include "evolution.h"
+#include "time.h"
 
 #ifndef M_PI
 #define M_PI 3.141592654
@@ -86,6 +87,7 @@ Cockroach *initializeSwarm(int swarmSize) {
 			.speedRho = 1.,
 			.speedTheta = valeurAleatoire()*2.*M_PI,	// GroupSpeedTheta
 			.gender = alea_gender(), // male or female
+			.growth = Larva, // larva by default
 			.mode = Walking, //walking by default
 			.capacity_to_eat = 0,
 			.capacity_to_avoid_light = 0,
@@ -311,6 +313,8 @@ void gestionEvenement(EvenementGfx event) {
 
 	static int nb_foodPoints;
 	static POINT *foodPoints = NULL; 
+
+	static int day = 1, iteration = 0;
 	
 	switch (event) {
 		case Initialisation:
@@ -322,6 +326,8 @@ void gestionEvenement(EvenementGfx event) {
 			break;
 
 		case Temporisation:
+			iteration++;
+			computes_day(&day,&iteration);
 			updateSwarm(cockroach, &NumberOfCockroachs, lightAbscissa, lightOrdinate, nb_foodPoints, foodPoints);
 			rafraichisFenetre();
 			break;
@@ -335,6 +341,7 @@ void gestionEvenement(EvenementGfx event) {
 			}
 			create_and_displayFood(foodPoints,nb_foodPoints);
 			displaySwarm(cockroach, NumberOfCockroachs);
+			display_day(day);
 			break;
 
 		case Clavier:

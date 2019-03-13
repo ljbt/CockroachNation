@@ -17,3 +17,4 @@ void adios(Cockroach *swarm, int *swarmSize, int idx_death)
     }
     (*swarmSize)--;
 }
+
