@@ -10,7 +10,7 @@ typedef struct {
 	enum {Eating, Walking} mode; // a cockroach can walk or eat, that's it
 	double capacity_to_eat;
 	double capacity_to_avoid_light;
-	double capacity_to_survive;
+	double capacity_to_survive; //jauge bouffe
 } Cockroach;
 
 

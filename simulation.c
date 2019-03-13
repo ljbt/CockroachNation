@@ -34,9 +34,21 @@ const double MinDistanceFromBoxEdges = 1.;// A minimal distance with the edges o
 const double Speed_of_digestion = .1; //when the cockroach walks he digests
 const double Speed_of_exctinction = .1; // when the cockroach has to survive he looses life
 
+const double EatValue = 5.0;
+const double SpeedOfDeath = 0.5;
+const double ValorisationLight = 50.0;
+const double MaxLife = 100.0;
+
 
 //enum {RandomWalker, SimpleCockroach} mode = SimpleCockroach /*RandomWalker*/;
 
+double valorisation(Cockroach cockroach)
+{
+  	if(cockroach.capacity_to_eat > cockroach.capacity_to_avoid_light)
+  		return 0.0;
+    else 
+      	return 100.0;
+}
 
 // To draw a circle
 void circle(float xCenter, float yCenter, float radius)
@@ -68,6 +80,8 @@ void create_and_displayFood(POINT* foodPoints, int nb_foodPoints)
 Cockroach *initializeSwarm(int swarmSize) {
 	Cockroach *swarm = (Cockroach*)calloc(swarmSize, sizeof(Cockroach));
 	//const double GroupSpeedTheta = 0.;//valeurAleatoire()*2.*M_PI;
+  	double groupBaseEat = valeurAleatoire() * 80 + 10; // valeur entre 10 et 90
+  	double groupBaseLight = valeurAleatoire() * 80 + 10; // valeur entre 10 et 90
 	for (int i = 0; i < swarmSize; ++i) {
 		const double theta = valeurAleatoire()*2.*M_PI;
 		const double rho = sqrt(valeurAleatoire()*pow(fmin(WindowWidth/2., WindowHeight/2.), 2));
@@ -79,9 +93,9 @@ Cockroach *initializeSwarm(int swarmSize) {
 			.speedRho = 1.,
 			.speedTheta = valeurAleatoire()*2.*M_PI,	// GroupSpeedTheta
 			swarm[i].mode = Walking,
-			.capacity_to_eat = 0,
-			.capacity_to_avoid_light = 0,
-			.capacity_to_survive = rand_a_b(90,200), //random capacity to survive for each cockroach
+			.capacity_to_eat = groupBaseEat + (valeurAleatoire() * 20 - 10), // entre 0 et 100 car de base entre 0 et 90 et on ajoute ou enleve 10
+			.capacity_to_avoid_light = groupBaseLight + (valeurAleatoire() * 20 - 10),
+			.capacity_to_survive = MaxLife // max de la jauge
 		};
 		
 	}
@@ -99,7 +113,7 @@ void updateSwarm(Cockroach *swarm, int *swarmSize, int lightAbscissa, int lightO
 	for (int i = 0; i < *swarmSize; ++i) {	// All the individuals
 		switch (swarm[i].mode) {
 			case Eating:
-				
+
 					swarm[i].speedTheta = valeurAleatoire()*2.*M_PI;
 
 				{
@@ -109,9 +123,14 @@ void updateSwarm(Cockroach *swarm, int *swarmSize, int lightAbscissa, int lightO
 					indexCloseFood(swarm[i], nb_foodPoints, foodPoints, &i_close_food, &hypothenuse_close_food);
 					if (hypothenuse_close_food < foodPoints[i_close_food].rayon) {
 						foodPoints[i_close_food].rayon -= 0.1;
+                      	swarm[i].capacity_to_survive += EatValue;
+                      if (swarm[i].capacity_to_survive > MaxLife){
+                        	swarm[i].capacity_to_survive = MaxLife;
+                      }
 					}
 					else swarm[i].mode = Walking;
 				}
+            	if (valorisation(swarm[i]) > ValorisationLight)
 				{
 					// Rule 6: walk when detect light
 					if (lightAbscissa >= 0 && lightOrdinate >= 0) {
@@ -129,13 +148,15 @@ void updateSwarm(Cockroach *swarm, int *swarmSize, int lightAbscissa, int lightO
 					/*Rule of beeing alive: if he walks he looses food energy, 
 					if hs no more food energy he has to survive, 
 					then if he hasnt energy to survive he dies */
-					if(swarm[i].capacity_to_eat > 0)
+					/*if(swarm[i].capacity_to_eat > 0)
 						swarm[i].capacity_to_eat -= Speed_of_digestion;
 					else if(swarm[i].capacity_to_eat <= 0 && swarm[i].capacity_to_survive > 0)
 						swarm[i].capacity_to_survive -= Speed_of_exctinction;
-					else if (swarm[i].capacity_to_eat <= 0 && swarm[i].capacity_to_survive <= 0)
+					else if (swarm[i].capacity_to_eat <= 0 && swarm[i].capacity_to_survive <= 0)*/
+                  	swarm[i].capacity_to_survive -= SpeedOfDeath;
+                  	if(swarm[i].capacity_to_survive <= 0)
 					{
-						printf("hey number %d died bro\n", i);
+						printf("hey number %d died bro %d\n", i, swarm[i].capacity_to_survive);
 						adios(swarm, swarmSize, i); //death of little cockroach
 						printf("%d cockroach left\n", *swarmSize);
 					}
@@ -230,6 +251,7 @@ void updateSwarm(Cockroach *swarm, int *swarmSize, int lightAbscissa, int lightO
 						}
 						else swarm[i].mode = Eating;
 				}
+              	if(valorisation(swarm[i]) > ValorisationLight)
 				{
 					// Rule 4: avoid the light
 					if (lightAbscissa >= 0 && lightOrdinate >= 0) {
