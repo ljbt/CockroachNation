@@ -23,7 +23,7 @@ const double Bubble = 5.;			// A minimal distance between cockroachs
 const double WeightOfEscape = .8;
 const double WeightOfMimic = .1;
 const double MimicHorizon = 30.;		// Units to look for neighbors to mimic
-const double lightBubble = 100.;		// A minimal distance with the light
+const double lightBubble = 50.;		// A minimal distance with the light
 const double foodBubble = 50.;		// food area distance
 const int nb_max_foodPoints = 4;
 const double WeightOfFoodApproach = .3;
@@ -37,14 +37,17 @@ const double EatValue = 5.0;
 const double SpeedOfDeath = 0.1;
 const double ValorisationLight = 50.0;
 const double MaxLife = 100.0;
+const double SeuilSurvie = 10.0;
 const double ProbaPredateurEating = 2.0; // Chance sur 1000
 const double ProbaPredateurWalking = 1.0; // Chance sur 1000
 
-
 //enum {RandomWalker, SimpleCockroach} mode = SimpleCockroach /*RandomWalker*/;
 
+//Eat if < 50, avoid light if > 50. 
 double valorisation(Cockroach cockroach)
 {
+  	if (cockroach.capacity_to_survive < SeuilSurvie)
+      	return 0.0;
 	if(cockroach.capacity_to_eat > cockroach.capacity_to_avoid_light)
 		return 0.0;
 	else 
