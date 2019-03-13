@@ -4,7 +4,6 @@
 #include <strings.h>	// For bzero()
 #include <stdbool.h>
 #include <time.h>
-
 #include "GfxLib.h"		// To do simple graphics
 #include "ESLib.h"		// For valeurAleatoire()
 
@@ -35,19 +34,21 @@ const double Speed_of_digestion = .1; //when the cockroach walks he digests
 const double Speed_of_exctinction = .1; // when the cockroach has to survive he looses life
 
 const double EatValue = 5.0;
-const double SpeedOfDeath = 0.5;
+const double SpeedOfDeath = 0.1;
 const double ValorisationLight = 50.0;
 const double MaxLife = 100.0;
+const double ProbaPredateurEating = 2.0; // Chance sur 1000
+const double ProbaPredateurWalking = 1.0; // Chance sur 1000
 
 
 //enum {RandomWalker, SimpleCockroach} mode = SimpleCockroach /*RandomWalker*/;
 
 double valorisation(Cockroach cockroach)
 {
-  	if(cockroach.capacity_to_eat > cockroach.capacity_to_avoid_light)
-  		return 0.0;
-    else 
-      	return 100.0;
+	if(cockroach.capacity_to_eat > cockroach.capacity_to_avoid_light)
+		return 0.0;
+	else 
+		return 100.0;
 }
 
 // To draw a circle
@@ -61,8 +62,8 @@ void circle(float xCenter, float yCenter, float radius)
 	{
 		const double angle = 2.*M_PI*index/Steps; // Compute the starting angle
 		triangle(xCenter, yCenter,
-                xCenter+radius*cos(angle), yCenter+radius*sin(angle),
-			     xCenter+radius*cos(angle+AngularSteps), yCenter+radius*sin(angle+AngularSteps));
+			xCenter+radius*cos(angle), yCenter+radius*sin(angle),
+					xCenter+radius*cos(angle+AngularSteps), yCenter+radius*sin(angle+AngularSteps));
 	}
 }
 
@@ -72,73 +73,92 @@ void create_and_displayFood(POINT* foodPoints, int nb_foodPoints)
     for(int i=0; i<nb_foodPoints; ++i){
 		if (foodPoints[i].rayon < 2.)
 			foodPoints[i] = positionFoodArea();
-        circle(foodPoints[i].x,foodPoints[i].y,round(foodPoints[i].rayon));
+		circle(foodPoints[i].x,foodPoints[i].y,round(foodPoints[i].rayon));
     }
 }
 
 
-Cockroach *initializeSwarm(int swarmSize) {
+Cockroach *initializeSwarm(int swarmSize) 
+{
 	Cockroach *swarm = (Cockroach*)calloc(swarmSize, sizeof(Cockroach));
 	//const double GroupSpeedTheta = 0.;//valeurAleatoire()*2.*M_PI;
-  	double groupBaseEat = valeurAleatoire() * 80 + 10; // valeur entre 10 et 90
-  	double groupBaseLight = valeurAleatoire() * 80 + 10; // valeur entre 10 et 90
+	double groupBaseEat = rand_a_b(10, 90); // valeur entre 10 et 90
+	double groupBaseLight = rand_a_b(10, 90); // valeur entre 10 et 90
 	for (int i = 0; i < swarmSize; ++i) {
-		const double theta = valeurAleatoire()*2.*M_PI;
-		const double rho = sqrt(valeurAleatoire()*pow(fmin(WindowWidth/2., WindowHeight/2.), 2));
-		const double x = WindowWidth*.5+cos(theta)*rho;
-		const double y = WindowHeight*.5+sin(theta)*rho;
-		swarm[i] = (Cockroach){
+	const double theta = valeurAleatoire()*2.*M_PI;
+	const double rho = sqrt(valeurAleatoire()*pow(fmin(WindowWidth/2., WindowHeight/2.), 2));
+	const double x = WindowWidth*.5+cos(theta)*rho;
+	const double y = WindowHeight*.5+sin(theta)*rho;
+	swarm[i] = (Cockroach){
 			.x = x,
 			.y = y,
 			.speedRho = 1.,
 			.speedTheta = valeurAleatoire()*2.*M_PI,	// GroupSpeedTheta
 			swarm[i].mode = Walking,
-			.capacity_to_eat = groupBaseEat + (valeurAleatoire() * 20 - 10), // entre 0 et 100 car de base entre 0 et 90 et on ajoute ou enleve 10
-			.capacity_to_avoid_light = groupBaseLight + (valeurAleatoire() * 20 - 10),
+			.capacity_to_eat = groupBaseEat + (rand_a_b(0, 20) - 10), // entre 0 et 100 car de base entre 0 et 90 et on ajoute ou enleve 10
+			.capacity_to_avoid_light = groupBaseLight + (rand_a_b(0, 20) - 10),
 			.capacity_to_survive = MaxLife // max de la jauge
 		};
-		
 	}
 	return swarm;
 }
 
-void displaySwarm(const Cockroach *swarm, int swarmSize) {
+void displaySwarm(const Cockroach *swarm, int swarmSize) 
+{
 	epaisseurDeTrait(2);
 	couleurCourante(0, 0, 0);
 	for (int i = 0; i < swarmSize; ++i)
 		point(swarm[i].x, swarm[i].y);//, 1);
 }
 
-void updateSwarm(Cockroach *swarm, int *swarmSize, int lightAbscissa, int lightOrdinate, int nb_foodPoints, POINT *foodPoints) {
+void updateSwarm(Cockroach *swarm, int *swarmSize, int lightAbscissa, int lightOrdinate, int nb_foodPoints, POINT *foodPoints) 
+{
 	for (int i = 0; i < *swarmSize; ++i) {	// All the individuals
-		switch (swarm[i].mode) {
+		switch (swarm[i].mode) 
+		{
 			case Eating:
-
 					swarm[i].speedTheta = valeurAleatoire()*2.*M_PI;
-
 				{
 					// Rule 7: eat from food area
 					int i_close_food;
 					double hypothenuse_close_food;
 					indexCloseFood(swarm[i], nb_foodPoints, foodPoints, &i_close_food, &hypothenuse_close_food);
-					if (hypothenuse_close_food < foodPoints[i_close_food].rayon) {
+					if (hypothenuse_close_food < foodPoints[i_close_food].rayon) 
+					{
 						foodPoints[i_close_food].rayon -= 0.1;
-                      	swarm[i].capacity_to_survive += EatValue;
-                      if (swarm[i].capacity_to_survive > MaxLife){
-                        	swarm[i].capacity_to_survive = MaxLife;
-                      }
+						swarm[i].capacity_to_survive += EatValue;
+						if (swarm[i].capacity_to_survive > MaxLife)
+						{
+						swarm[i].capacity_to_survive = MaxLife;
+						}
 					}
 					else swarm[i].mode = Walking;
 				}
-            	if (valorisation(swarm[i]) > ValorisationLight)
 				{
-					// Rule 6: walk when detect light
+					// Rule 6: walk when detect light if valorisation > ValorisationLight
 					if (lightAbscissa >= 0 && lightOrdinate >= 0) {
 						const double deltaX = lightAbscissa-swarm[i].x;
 						const double deltaY = lightOrdinate-swarm[i].y;
 						const double hypotenuse = hypot(deltaX, deltaY);
-						if (hypotenuse < lightBubble) {
-							swarm[i].mode = Walking;
+						if (hypotenuse < lightBubble)
+						{
+							if (valorisation(swarm[i]) > ValorisationLight)
+							{
+								swarm[i].mode = Walking;
+							}
+							else
+							{
+								if (rand_a_b(0, 1000) <= ProbaPredateurEating)
+								{
+									printf("hey number %d died because of PREDATOR while eating\n", i);
+									adios(swarm, swarmSize, i); //death of little cockroach
+									if(*swarmSize == 0)
+									{
+										printf("Everybody died... :(\n");
+										exit(0);
+									}
+								}
+							}
 						}
 					}
 				}
@@ -156,7 +176,7 @@ void updateSwarm(Cockroach *swarm, int *swarmSize, int lightAbscissa, int lightO
                   	swarm[i].capacity_to_survive -= SpeedOfDeath;
                   	if(swarm[i].capacity_to_survive <= 0)
 					{
-						printf("hey number %d died bro %d\n", i, swarm[i].capacity_to_survive);
+						printf("hey number %d died bro\n", i);
 						adios(swarm, swarmSize, i); //death of little cockroach
 						printf("%d cockroach left\n", *swarmSize);
 					}
@@ -251,17 +271,31 @@ void updateSwarm(Cockroach *swarm, int *swarmSize, int lightAbscissa, int lightO
 						}
 						else swarm[i].mode = Eating;
 				}
-              	if(valorisation(swarm[i]) > ValorisationLight)
 				{
 					// Rule 4: avoid the light
-					if (lightAbscissa >= 0 && lightOrdinate >= 0) {
+					if (lightAbscissa >= 0 && lightOrdinate >= 0) 
+					{
 						const double deltaX = lightAbscissa-swarm[i].x;
 						const double deltaY = lightOrdinate-swarm[i].y;
 						const double hypotenuse = hypot(deltaX, deltaY);
-						if (hypotenuse < lightBubble) {
-							const double sumX = -(lightAbscissa-swarm[i].x)/hypotenuse*WeightOflightEscape+(1.-WeightOflightEscape)*cos(swarm[i].speedTheta)*swarm[i].speedRho;
-							const double sumY = -(lightOrdinate-swarm[i].y)/hypotenuse*WeightOflightEscape+(1.-WeightOflightEscape)*sin(swarm[i].speedTheta)*swarm[i].speedRho;
-							swarm[i].speedTheta = atan2(sumY, sumX);
+						if (hypotenuse < lightBubble) 
+						{
+							if(valorisation(swarm[i]) > ValorisationLight)
+							{
+								const double sumX = -(lightAbscissa-swarm[i].x)/hypotenuse*WeightOflightEscape+(1.-WeightOflightEscape)*cos(swarm[i].speedTheta)*swarm[i].speedRho;
+								const double sumY = -(lightOrdinate-swarm[i].y)/hypotenuse*WeightOflightEscape+(1.-WeightOflightEscape)*sin(swarm[i].speedTheta)*swarm[i].speedRho;
+								swarm[i].speedTheta = atan2(sumY, sumX);
+							}
+							if (rand_a_b(0, 1000) <= ProbaPredateurWalking)
+							{
+								printf("hey number %d died because of PREDATOR while walking\n", i);
+								adios(swarm, swarmSize, i); //death of little cockroach
+								if(*swarmSize == 0)
+								{
+									printf("Everybody died... :(\n");
+									exit(0);
+								}
+							}
 						}
 					}
 				}
@@ -276,13 +310,11 @@ void updateSwarm(Cockroach *swarm, int *swarmSize, int lightAbscissa, int lightO
 					{
 						tooClose = true;
 						sumX = (MinDistanceFromBoxEdges-swarm[i].x)/swarm[i].x*WeightOfEscape+(1.-WeightOfEscape)*cos(swarm[i].speedTheta)*swarm[i].speedRho;
-
 					}
 					else if (deltaX > WindowWidth-MinDistanceFromBoxEdges) 
 					{
 						tooClose = true;
 						sumX = (( WindowWidth-MinDistanceFromBoxEdges)-swarm[i].x)/swarm[i].x*WeightOfEscape+(1.-WeightOfEscape)*cos(swarm[i].speedTheta)*swarm[i].speedRho;
-
 					}
 					if (deltaY < MinDistanceFromBoxEdges) 
 					{
