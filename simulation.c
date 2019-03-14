@@ -168,8 +168,7 @@ void displaySwarm(const Cockroach *swarm, int swarmSize)
 		point(swarm[i].x, swarm[i].y);//, 1);
 }
 
-void updateSwarm(Cockroach *swarm, int *swarmSize, int lightAbscissa, int lightOrdinate, int nb_foodPoints, POINT *foodPoints, const int day) {
-
+Cockroach* updateSwarm(Cockroach *swarm, int *swarmSize, int lightAbscissa, int lightOrdinate, int nb_foodPoints, POINT *foodPoints, const int day) {
 	for (int i = 0; i < *swarmSize; ++i) {	// All the individuals
 
 		bool possiblePartner = false;
@@ -242,12 +241,13 @@ void updateSwarm(Cockroach *swarm, int *swarmSize, int lightAbscissa, int lightO
 									if (rand_a_b(0, 1000) <= ProbaPredateurEating)
 									{
 										printf("hey number %d died because of PREDATOR while eating\n", i);
-										adios(swarm, swarmSize, i); //death of little cockroach
+										swarm = adios(swarm, swarmSize, i); //death of little cockroach
 										if(*swarmSize == 0)
 										{
 											printf("Everybody died... :(\n");
 											exit(0);
 										}
+										continue; //We need to avoid using i after the realloc, we can have error if we are at the end of an array ! 
 									}
 								}
 							}
@@ -388,12 +388,13 @@ void updateSwarm(Cockroach *swarm, int *swarmSize, int lightAbscissa, int lightO
 								if (rand_a_b(0, 1000) <= ProbaPredateurWalking)
 								{
 									printf("hey number %d died because of PREDATOR while walking\n", i);
-									adios(swarm, swarmSize, i); //death of little cockroach
+									swarm = adios(swarm, swarmSize, i); //death of little cockroach
 									if(*swarmSize == 0)
 									{
 										printf("Everybody died... :(\n");
 										exit(0);
 									}
+									continue; //We need to avoid using i after the realloc, we can have error if we are at the end of an array ! 
 								}
 							}
 							else // not under the light so continue going to food
@@ -447,13 +448,14 @@ void updateSwarm(Cockroach *swarm, int *swarmSize, int lightAbscissa, int lightO
 				if(swarm[i].capacity_to_survive <= 0) 
 				{							
 					printf("RIP number %d\n", swarm[i].id);
-					adios(swarm, swarmSize, i); //death of little cockroach
+					swarm = adios(swarm, swarmSize, i); //death of little cockroach
 					printf("%d cockroaches left\n", *swarmSize);
-				}
-				if(*swarmSize == 0)
-				{
-					printf("Everybody died... :(\n");
-					exit(0);	
+					if(*swarmSize == 0)
+					{
+						printf("Everybody died... :(\n");
+						exit(0);	
+					}
+					continue; //We need to avoid using i after the realloc, we can have error if we are at the end of an array ! 
 				}
 			}
 			{			
@@ -495,6 +497,7 @@ void updateSwarm(Cockroach *swarm, int *swarmSize, int lightAbscissa, int lightO
 		swarm[i].x += swarm[i].speedRho*cos(swarm[i].speedTheta);
 		swarm[i].y += swarm[i].speedRho*sin(swarm[i].speedTheta);
 	}
+	return swarm; // Need to return swarm in case of a realloc happened 
 }
 
 int main(int argc, char *argv[]) {
@@ -530,7 +533,7 @@ void gestionEvenement(EvenementGfx event) {
 		case Temporisation:
 			iteration++;
 			computes_day(&day,&iteration);
-			updateSwarm(cockroach, &NumberOfCockroachs, lightAbscissa, lightOrdinate, nb_foodPoints, foodPoints, day);
+			cockroach = updateSwarm(cockroach, &NumberOfCockroachs, lightAbscissa, lightOrdinate, nb_foodPoints, foodPoints, day);
 			rafraichisFenetre();
 			break;
 
