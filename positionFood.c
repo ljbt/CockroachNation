@@ -6,6 +6,52 @@
 #include "definitions.h"
 #include "positionFood.h"
 
+POINT* currentLight (Cockroach insect, int nb_lightPoints, POINT *lightPoints)
+{
+  	for (int i = 0; i<nb_lightPoints; i++){
+      	double deltaX = lightPoints[i].x - insect.x;
+      	double deltaY = lightPoints[i].y - insect.y;
+        double hypotenuse = hypot(deltaX, deltaY);
+      	if (hypotenuse < lightPoints[i].rayon){
+          	return &(lightPoints[i]);
+        }
+    }
+    return NULL;
+}
+
+void create_and_displayLight(POINT* lightPoints, int nb_lightPoints)
+{
+	couleurCourante(255, 235, 125);
+    for(int i=0; i<nb_lightPoints; ++i){
+		if (lightPoints[i].time <= 0)
+			lightPoints[i] = positionLightArea();
+        circle(lightPoints[i].x,lightPoints[i].y,round(lightPoints[i].rayon));
+    }
+}
+
+
+POINT positionLightArea(void)
+{
+    POINT lightPoint;
+    lightPoint.x = rand_a_b(0,WindowWidth);
+    lightPoint.y = rand_a_b(0,WindowHeight);
+    lightPoint.rayon = rand_a_b(30, 80);
+  	lightPoint.time = rand_a_b(500, 1000);
+    return lightPoint;
+}
+
+//create a number (passed in parameter) of food areas positioned randomly
+POINT* positionsLightAreas (int nb_lightPoints)
+{
+    POINT *lightPoints = (POINT*)malloc(sizeof(POINT)*nb_lightPoints);
+
+    for(int i=0; i<nb_lightPoints; ++i){
+        lightPoints[i] = positionLightArea();
+    }
+
+    return lightPoints;
+}
+
 void create_and_displayFood(POINT* foodPoints, int nb_foodPoints)
 {
 	couleurCourante(51,102,0);

@@ -24,7 +24,8 @@ const double WeightOfMimic = .1;
 const double MimicHorizon = 30.;		// Units to look for neighbors to mimic
 const double lightBubble = 50.;		// A minimal distance with the light
 const double foodBubble = 50.;		// food area distance
-const int nb_max_foodPoints = 4;
+const int nb_max_foodPoints = 5;
+const int nb_max_lightPoints = 6;
 const double WeightOfFoodApproach = .3;
 const double WeightOflightEscape = .8;
 const double MinDistanceFromBoxEdges = 1.;// A minimal distance with the edges of the box
@@ -42,6 +43,7 @@ const double MaxLife = 200.;
 const double SeuilSurvie = 10.0;
 const double ProbaPredateurEating = 2.0; // Chance sur 1000
 const double ProbaPredateurWalking = 1.0; // Chance sur 1000
+const int LightDeath = 1; 
 
 
 //Eat if < 50, avoid light if > 50. 
@@ -176,7 +178,8 @@ void displaySwarm(const Cockroach *swarm, int swarmSize)
 		point(swarm[i].x, swarm[i].y);//, 1);
 }
 
-void updateSwarm(Cockroach **swarm, int *swarmSize, int lightAbscissa, int lightOrdinate, int nb_foodPoints, POINT *foodPoints, const int day) {
+void updateSwarm(Cockroach **swarm, int *swarmSize, int lightAbscissa, int lightOrdinate, int nb_foodPoints, POINT *foodPoints, int nb_lightPoints, POINT* lightPoints, const int day) {
+
 	for (int i = 0; i < *swarmSize; ++i) {	// All the individuals
 
 		bool possiblePartner = false;
@@ -232,32 +235,32 @@ void updateSwarm(Cockroach **swarm, int *swarmSize, int lightAbscissa, int light
 					}
 					{
 						// Rule 6: walk when detect light while eating
-						if (lightAbscissa >= 0 && lightOrdinate >= 0) {
-							const double deltaX = lightAbscissa-(*swarm)[i].x;
-							const double deltaY = lightOrdinate-(*swarm)[i].y;
-							const double hypotenuse = hypot(deltaX, deltaY);
-							if (hypotenuse < lightBubble)
-							{
-								if (valorisation((*swarm)[i]) > ValorisationLight)
-								{
-									(*swarm)[i].mode = Walking; // escape light
-								}
-								else // more attracted by food
-								{
-									if (rand_a_b(0, 1000) <= ProbaPredateurEating)
-									{
-										printf("hey number %d died because of PREDATOR while eating\n", i);
-										adios((*swarm), swarmSize, i); //death of little cockroach
-										if(*swarmSize == 0)
-										{
-											printf("Everybody died... :(\n");
-											exit(0);
-										}
-										continue; //We need to avoid using i after the realloc, we can have error if we are at the end of an array ! 
-									}
-								}
-							}
-						} 
+                          const double deltaX = lightAbscissa-(*swarm)[i].x;
+                          const double deltaY = lightOrdinate-(*swarm)[i].y;
+                          const double hypotenuse = hypot(deltaX, deltaY);
+                      	  POINT* light = currentLight((*swarm)[i], nb_lightPoints, lightPoints);
+                      
+                     	  if ((lightAbscissa >= 0 && lightOrdinate >= 0 && hypotenuse < lightBubble) || (light != NULL)) {
+                          {
+                              if (valorisation((*swarm)[i]) > ValorisationLight)
+                              {
+                                  (*swarm)[i].mode = Walking; // escape light
+                              }
+                              else // more attracted by food
+                              {
+                                  if (rand_a_b(0, 1000) <= ProbaPredateurEating)
+                                  {
+                                      printf("hey number %d died because of PREDATOR while eating\n", i);
+                                      adios((*swarm), swarmSize, i); //death of little cockroach
+                                      if(*swarmSize == 0)
+                                      {
+                                          printf("Everybody died... :(\n");
+                                          exit(0);
+                                      }
+                                      continue; //We need to avoid using i after the realloc, we can have error if we are at the end of an array ! 
+                                  }
+                              }
+                          }
 					}
 				}
 				break;
@@ -362,17 +365,25 @@ void updateSwarm(Cockroach **swarm, int *swarmSize, int lightAbscissa, int light
 					}
 					{
 						// Rule: walking behavior with light presence
-						if (lightAbscissa >= 0 && lightOrdinate >= 0) {
-						
-							const double deltaX = lightAbscissa-(*swarm)[i].x;
-							const double deltaY = lightOrdinate-(*swarm)[i].y;
-							const double hypotenuse = hypot(deltaX, deltaY);
-							if (hypotenuse < lightBubble) 
-							{
+                     	  double deltaX = lightAbscissa-(*swarm)[i].x;
+                          double deltaY = lightOrdinate-(*swarm)[i].y;
+                          double hypotenuse = hypot(deltaX, deltaY);
+                       	  POINT* light = currentLight((*swarm)[i], nb_lightPoints, lightPoints);
+                      	  int lightX = lightAbscissa;
+                      	  int lightY = lightOrdinate;
+                      
+                     	  if ((lightAbscissa >= 0 && lightOrdinate >= 0 && hypotenuse < lightBubble) || (light != NULL)) {
+                            	if (lightAbscissa < 0 || lightOrdinate < 0 || hypotenuse >= lightBubble){
+                            		lightX = light->x; 
+                                  	lightY = light->y;
+                                  	deltaX = lightX-(*swarm)[i].x;
+                                    deltaY = lightY-(*swarm)[i].y;
+                                    hypotenuse = hypot(deltaX, deltaY);
+                        		}
 								if(valorisation((*swarm)[i]) > ValorisationLight) // escape light if more sensitive to light than attrated by food
 								{
-									const double sumX = -(lightAbscissa-(*swarm)[i].x)/hypotenuse*WeightOflightEscape+(1.-WeightOflightEscape)*cos((*swarm)[i].speedTheta)*(*swarm)[i].speedRho;
-									const double sumY = -(lightOrdinate-(*swarm)[i].y)/hypotenuse*WeightOflightEscape+(1.-WeightOflightEscape)*sin((*swarm)[i].speedTheta)*(*swarm)[i].speedRho;
+									const double sumX = -(lightX-(*swarm)[i].x)/hypotenuse*WeightOflightEscape+(1.-WeightOflightEscape)*cos((*swarm)[i].speedTheta)*(*swarm)[i].speedRho;
+									const double sumY = -(lightY-(*swarm)[i].y)/hypotenuse*WeightOflightEscape+(1.-WeightOflightEscape)*sin((*swarm)[i].speedTheta)*(*swarm)[i].speedRho;
 									(*swarm)[i].speedTheta = atan2(sumY, sumX);
 								}
 								else // more attracted by food
@@ -489,7 +500,11 @@ void updateSwarm(Cockroach **swarm, int *swarmSize, int lightAbscissa, int light
 			}
 		}
 	}
-		printf("size = %d\n", *swarmSize);
+  
+  	//Update light life
+  	for (int i = 0; i < nb_lightPoints; ++i) {
+		lightPoints[i].time -= LightDeath;
+	}
 	// Update position
 	for (int i = 0; i < *swarmSize; ++i) {
 		(*swarm)[i].x += (*swarm)[i].speedRho*cos((*swarm)[i].speedTheta);
@@ -517,6 +532,9 @@ void gestionEvenement(EvenementGfx event) {
 	static int nb_foodPoints;
 	static POINT *foodPoints = NULL; 
 
+	static int nb_lightPoints;
+	static POINT *lightPoints = NULL; 
+	
 	static int day = 1, iteration = 0;
 	
 	switch (event) {
@@ -524,19 +542,22 @@ void gestionEvenement(EvenementGfx event) {
 			srand(time(NULL)); //seed initialization for random values
 			demandeTemporisation(20);
 			cockroach = initializeSwarm(NumberOfCockroachs);
-			nb_foodPoints = rand_a_b(1,nb_max_foodPoints+1);
+			nb_foodPoints = rand_a_b(3,nb_max_foodPoints+1);
 			foodPoints = positionsFoodAreas(nb_foodPoints);
+			nb_lightPoints = rand_a_b(3,nb_max_lightPoints+1);
+			lightPoints = positionsLightAreas(nb_lightPoints);
 			break;
 
 		case Temporisation:
 			iteration++;
 			computes_day(&day,&iteration);
-			updateSwarm(&cockroach, &NumberOfCockroachs, lightAbscissa, lightOrdinate, nb_foodPoints, foodPoints, day);
+			updateSwarm(&cockroach, &NumberOfCockroachs, lightAbscissa, lightOrdinate, nb_foodPoints, foodPoints, nb_lightPoints, lightPoints, day);
 			rafraichisFenetre();
 			break;
 
 		case Affichage:
 			effaceFenetre (255, 255, 255);
+			create_and_displayLight(lightPoints,nb_lightPoints);
 			if (displaylight)
 			{
 				couleurCourante(255, 235, 0);
