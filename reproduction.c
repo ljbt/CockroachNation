@@ -63,4 +63,5 @@ void reproduction (Cockroach *swarm, int idx_parent_1, int idx_parent_2, int *sw
 {
     swarm[idx_parent_1].last_reproduction_day = swarm[idx_parent_2].last_reproduction_day = day;
     swarm[idx_parent_1].time_for_reproduction = swarm[idx_parent_2].time_for_reproduction = false;
+    swarm[idx_parent_1].mode = swarm[idx_parent_2].mode = Walking;
 }
