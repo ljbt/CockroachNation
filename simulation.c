@@ -82,6 +82,23 @@ void affichePoint(POINT p)
 	printf("x = %d , y = %d\n", p.x, p.y);
 }
 
+void displayCockroachDetails(Cockroach insect)
+{
+	printf(" id: %d\n x = %f, y = %f\n %s\n",
+		insect.id,insect.x,insect.y,getGenderName(insect.gender)
+		);
+}
+
+void displaySwarmDetails (Cockroach *swarm, const int swarmSize)
+{
+	printf("\nswarm size = %d\n", swarmSize);
+	for(int i = 0; i < swarmSize; i++)
+	{
+		printf("\nidx %d\n", i);
+		displayCockroachDetails(swarm[i]);
+	}
+	
+}
 
 /* function that return a random gender (male or female)
 	for swarm initialization */
@@ -104,12 +121,6 @@ const char* getGenderName (Gender gender)
 			break;
 		default: return "unknown";
 	}
-/* 	couleurCourante(51,102,0);													modif Laura
-    for(int i=0; i<nb_foodPoints; ++i){
-		if (foodPoints[i].rayon < 2.)
-			foodPoints[i] = positionFoodArea();
-		circle(foodPoints[i].x,foodPoints[i].y,round(foodPoints[i].rayon));
-    } */
 }
 
 bool opposite_gender (Gender g1, Gender g2)
@@ -189,8 +200,8 @@ void updateSwarm(Cockroach *swarm, int *swarmSize, int lightAbscissa, int lightO
 					}
 					else // partner in intimate zone
 					{
-						printf("%d and %d have babies !\n", swarm[i].id, swarm[i_close_partner].id);
-						reproduction(swarm,i,i_close_partner,swarmSize,day);  // crossover and all in this function ! 
+						swarm = reproduction(swarm,i,i_close_partner,swarmSize,day);  // crossover and all in this function !
+						displaySwarmDetails(swarm,*swarmSize);
 					}
 					 
 				}
@@ -265,8 +276,8 @@ void updateSwarm(Cockroach *swarm, int *swarmSize, int lightAbscissa, int lightO
 					}
 					else // partner in intimate zone
 					{
-						printf("%d and %d have babies !\n", swarm[i].id, swarm[i_close_partner].id);
-						reproduction(swarm,i,i_close_partner,swarmSize,day);  // crossover and all in this function !
+						swarm = reproduction(swarm,i,i_close_partner,swarmSize,day);  // crossover and all in this function !
+						displaySwarmDetails(swarm,*swarmSize);
 					}
 					 
 				}

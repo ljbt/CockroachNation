@@ -46,6 +46,8 @@ struct POINT{
 void circle(float xCenter, float yCenter, float radius);
 int rand_a_b(int a, int b);
 void affichePoint(POINT p);
+void displayCockroachDetails(Cockroach insect);
+void displaySwarmDetails (Cockroach *swarm, const int swarmSize);
 Gender alea_gender();
 const char* getGenderName (Gender gender);
 bool opposite_gender (Gender g1, Gender g2);

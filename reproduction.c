@@ -87,20 +87,22 @@ int find_new_id(Cockroach *swarm, int swarmSize)
     return swarmSize;
 }
 
-void createLarva(Cockroach *swarm, int idx_parent_1, int idx_parent_2, int *swarmSize)
+Cockroach* createLarva(Cockroach *swarm, int idx_parent_1, int idx_parent_2, int *swarmSize)
 {
     (*swarmSize)++;
-    swarm = (Cockroach *)realloc(swarm, (*swarmSize));
+    printf("new size = %d\n", *swarmSize);
+    Cockroach *new_swarm;
+    new_swarm = (Cockroach *)realloc(swarm, sizeof(Cockroach) * (*swarmSize));
 
     // now init new larva values
-	swarm[(*swarmSize)-1] = (Cockroach){
-			.id = find_new_id(swarm,(*swarmSize)-1),
-			.x = swarm[idx_parent_1].x,
-			.y = swarm[idx_parent_1].y,
+	new_swarm[(*swarmSize)-1] = (Cockroach){
+			.id = find_new_id(new_swarm,(*swarmSize)-1),
+			.x = new_swarm[idx_parent_1].x,
+			.y = new_swarm[idx_parent_1].y,
 			.speedRho = 1.,
 			.speedTheta = valeurAleatoire()*2.*M_PI,	// GroupSpeedTheta
 			.gender = alea_gender(), // male or female
-			.growth = Larva, // larva by default
+			.growth = Larva, 
 			.adult_date = rand_a_b(1,6), //time from larva to adult (between 2 and 6 days here)
 			.time_for_reproduction = false,
 			.last_reproduction_day = 0, // no reproduction yet
@@ -110,20 +112,23 @@ void createLarva(Cockroach *swarm, int idx_parent_1, int idx_parent_2, int *swar
 			.capacity_to_survive = 100 // max de la jauge
 		};
 
-    printf("new id = %d\n", swarm[(*swarmSize)-1].id);
+    printf("new id = %d\n", new_swarm[(*swarmSize)-1].id);
+    return new_swarm;
 }
 
 
-void reproduction (Cockroach *swarm, int idx_parent_1, int idx_parent_2, int *swarmSize, const int day)
+Cockroach * reproduction (Cockroach *swarm, int idx_parent_1, int idx_parent_2, int *swarmSize, const int day)
 {
+	printf("%d and %d have babies !\n", swarm[idx_parent_1].id, swarm[idx_parent_2].id);
     swarm[idx_parent_1].last_reproduction_day = swarm[idx_parent_2].last_reproduction_day = day;
+    swarm[idx_parent_1].time_for_reproduction = swarm[idx_parent_2].time_for_reproduction = false;
+    swarm[idx_parent_1].mode = swarm[idx_parent_2].mode = Walking;
 
     int nb_larva = rand_a_b(10,20);
 
-/*     printf("size = %d\n",(*swarmSize));
-    createLarva(swarm,idx_parent_1,idx_parent_2,swarmSize);
-    printf("size = %d\n",(*swarmSize)); */
+    Cockroach *new_swarm;
+    new_swarm = createLarva(swarm,idx_parent_1,idx_parent_2,swarmSize);
 
-    swarm[idx_parent_1].time_for_reproduction = swarm[idx_parent_2].time_for_reproduction = false;
-    swarm[idx_parent_1].mode = swarm[idx_parent_2].mode = Walking;
-}
+//    displaySwarmDetails(swarm,*swarmSize);
+    return new_swarm;
+ }
