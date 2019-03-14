@@ -38,6 +38,7 @@ typedef struct POINT POINT;
 struct POINT{
 	int x, y;
 	double rayon;
+	int time;
 };
 
 

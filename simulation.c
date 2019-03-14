@@ -24,7 +24,8 @@ const double WeightOfMimic = .1;
 const double MimicHorizon = 30.;		// Units to look for neighbors to mimic
 const double lightBubble = 50.;		// A minimal distance with the light
 const double foodBubble = 50.;		// food area distance
-const int nb_max_foodPoints = 4;
+const int nb_max_foodPoints = 5;
+const int nb_max_lightPoints = 6;
 const double WeightOfFoodApproach = .3;
 const double WeightOflightEscape = .8;
 const double MinDistanceFromBoxEdges = 1.;// A minimal distance with the edges of the box
@@ -518,6 +519,9 @@ void gestionEvenement(EvenementGfx event) {
 	static int nb_foodPoints;
 	static POINT *foodPoints = NULL; 
 
+	static int nb_lightPoints;
+	static POINT *lightPoints = NULL; 
+	
 	static int day = 1, iteration = 0;
 	
 	switch (event) {
@@ -525,14 +529,16 @@ void gestionEvenement(EvenementGfx event) {
 			srand(time(NULL)); //seed initialization for random values
 			demandeTemporisation(20);
 			cockroach = initializeSwarm(NumberOfCockroachs);
-			nb_foodPoints = rand_a_b(1,nb_max_foodPoints+1);
+			nb_foodPoints = rand_a_b(3,nb_max_foodPoints+1);
 			foodPoints = positionsFoodAreas(nb_foodPoints);
+			nb_lightPoints = rand_a_b(3,nb_max_lightPoints+1);
+			lightPoints = positionsLightAreas(nb_lightPoints);
 			break;
 
 		case Temporisation:
 			iteration++;
 			computes_day(&day,&iteration);
-			updateSwarm(&cockroach, &NumberOfCockroachs, lightAbscissa, lightOrdinate, nb_foodPoints, foodPoints, day);
+			updateSwarm(&cockroach, &NumberOfCockroachs, lightAbscissa, lightOrdinate, nb_foodPoints, foodPoints, nb_lightPoints, lightPoints, day);
 			rafraichisFenetre();
 			break;
 
@@ -544,6 +550,7 @@ void gestionEvenement(EvenementGfx event) {
 				circle(abscisseSouris(), ordonneeSouris(), lightBubble);
 			}
 			create_and_displayFood(foodPoints,nb_foodPoints);
+			create_and_displayLight(lightPoints,nb_lightPoints);
 			displaySwarm(cockroach, NumberOfCockroachs);
 			display_day(day);
 			break;

@@ -6,6 +6,40 @@
 #include "definitions.h"
 #include "positionFood.h"
 
+
+void create_and_displayLight(POINT* lightPoints, int nb_lightPoints)
+{
+	couleurCourante(255, 235, 0);
+    for(int i=0; i<nb_lightPoints; ++i){
+		if (lightPoints[i].time <= 0)
+			lightPoints[i] = positionLightArea();
+        circle(lightPoints[i].x,lightPoints[i].y,round(lightPoints[i].rayon));
+    }
+}
+
+
+POINT positionLightArea(void)
+{
+    POINT lightPoint;
+    lightPoint.x = rand_a_b(0,WindowWidth);
+    lightPoint.y = rand_a_b(0,WindowHeight);
+    lightPoint.rayon = rand_a_b(20, 60);
+  	lightPoint.time = rand_a_b(100, 200);
+    return lightPoint;
+}
+
+//create a number (passed in parameter) of food areas positioned randomly
+POINT* positionsLightAreas (int nb_lightPoints)
+{
+    POINT *lightPoints = (POINT*)malloc(sizeof(POINT)*nb_lightPoints);
+
+    for(int i=0; i<nb_lightPoints; ++i){
+        lightPoints[i] = positionLightArea();
+    }
+
+    return lightPoints;
+}
+
 void create_and_displayFood(POINT* foodPoints, int nb_foodPoints)
 {
 	couleurCourante(51,102,0);
