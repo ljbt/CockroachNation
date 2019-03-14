@@ -143,10 +143,6 @@ Cockroach *initializeSwarm(int swarmSize)
 			.adult_date = rand_a_b(1,6), //time from larva to adult (between 2 and 6 days here)
 			.time_for_reproduction = false,
 			.last_reproduction_day = 0, // no reproduction yet
-/* 			.mode = Walking, //walking by default 									modif Raph
-			.food_attraction = 0,
-			.light_sensitivity = 0,
-			.capacity_to_survive = rand_a_b(90,200), //random capacity to survive without food for each cockroach */
 			swarm[i].mode = Walking,
 			.food_attraction = groupBaseEat + (rand_a_b(0, 20) - 10), // entre 0 et 100 car de base entre 0 et 90 et on ajoute ou enleve 10
 			.light_sensitivity = groupBaseLight + (rand_a_b(0, 20) - 10),
@@ -181,7 +177,6 @@ void updateSwarm(Cockroach *swarm, int *swarmSize, int lightAbscissa, int lightO
 				/// Rule: find the one
 				if( swarm[i].time_for_reproduction)
 				{
-//					printf("%s %d its time to find the one\n",getGenderName(swarm[i].gender), swarm[i].id);
 					indexClosePartner(swarm, i, *swarmSize, &i_close_partner, &hypothenuse_close_partner);
 					if(i_close_partner != -1 ) // possible partner
 						possiblePartner = true;
@@ -189,10 +184,8 @@ void updateSwarm(Cockroach *swarm, int *swarmSize, int lightAbscissa, int lightO
 
 				if (possiblePartner)
 				{
-	//				printf("%d saw %d\n",swarm[i].id, swarm[i_close_partner].id);
 					if (hypothenuse_close_partner > IntimateZone) // partner not in intimate zone change position
 					{
-//						printf("%d going to %d\n",swarm[i].id, swarm[i_close_partner].id);
 						const double sumX = (swarm[i_close_partner].x-swarm[i].x)/hypothenuse_close_partner*WeightOfPartnerApproach+(1.-WeightOfPartnerApproach)*cos(swarm[i].speedTheta)*swarm[i].speedRho;
 						const double sumY = (swarm[i_close_partner].y-swarm[i].y)/hypothenuse_close_partner*WeightOfPartnerApproach+(1.-WeightOfPartnerApproach)*sin(swarm[i].speedTheta)*swarm[i].speedRho;
 						swarm[i].speedTheta = atan2(sumY, sumX);
@@ -204,9 +197,8 @@ void updateSwarm(Cockroach *swarm, int *swarmSize, int lightAbscissa, int lightO
 					}
 					 
 				}
-				else // no partner so eat mode
+				else // no partner so EAT MODE
 				{
-//					printf("no partner for %s %d\n",getGenderName(swarm[i].gender), swarm[i].id);
 					swarm[i].speedTheta = valeurAleatoire()*2.*M_PI; // a little bit of movement
 
 					{
@@ -217,7 +209,7 @@ void updateSwarm(Cockroach *swarm, int *swarmSize, int lightAbscissa, int lightO
 						if (hypothenuse_close_food < foodPoints[i_close_food].rayon) 
 						{
 							foodPoints[i_close_food].rayon -= 0.1;
-							swarm[i].capacity_to_survive += EatValue;
+							swarm[i].capacity_to_survive += EatValue;  
 							if (swarm[i].capacity_to_survive > MaxLife)
 							{
 							swarm[i].capacity_to_survive = MaxLife;
@@ -226,7 +218,7 @@ void updateSwarm(Cockroach *swarm, int *swarmSize, int lightAbscissa, int lightO
 						else swarm[i].mode = Walking;
 					}
 					{
-						// Rule 6: walk when detect light
+						// Rule 6: walk when detect light while eating
 						if (lightAbscissa >= 0 && lightOrdinate >= 0) {
 							const double deltaX = lightAbscissa-swarm[i].x;
 							const double deltaY = lightOrdinate-swarm[i].y;
@@ -235,9 +227,9 @@ void updateSwarm(Cockroach *swarm, int *swarmSize, int lightAbscissa, int lightO
 							{
 								if (valorisation(swarm[i]) > ValorisationLight)
 								{
-									swarm[i].mode = Walking;
+									swarm[i].mode = Walking; // escape light
 								}
-								else
+								else // more attracted by food
 								{
 									if (rand_a_b(0, 1000) <= ProbaPredateurEating)
 									{
@@ -261,7 +253,6 @@ void updateSwarm(Cockroach *swarm, int *swarmSize, int lightAbscissa, int lightO
 				/// Rule: find the one
 				if( swarm[i].time_for_reproduction)
 				{
-//					printf("%s %d its time to find the one\n",getGenderName(swarm[i].gender), swarm[i].id);
 					indexClosePartner(swarm, i, *swarmSize, &i_close_partner, &hypothenuse_close_partner);
 					if(i_close_partner != -1 ) // possible partner
 						possiblePartner = true;
@@ -269,10 +260,8 @@ void updateSwarm(Cockroach *swarm, int *swarmSize, int lightAbscissa, int lightO
 
 				if (possiblePartner)
 				{
-//					printf("%d saw %d\n",swarm[i].id, swarm[i_close_partner].id);
 					if (hypothenuse_close_partner > IntimateZone) // partner not in intimate zone change position
 					{
-//						printf("%d going to %d\n",swarm[i].id, swarm[i_close_partner].id);
 						const double sumX = (swarm[i_close_partner].x-swarm[i].x)/hypothenuse_close_partner*WeightOfPartnerApproach+(1.-WeightOfPartnerApproach)*cos(swarm[i].speedTheta)*swarm[i].speedRho;
 						const double sumY = (swarm[i_close_partner].y-swarm[i].y)/hypothenuse_close_partner*WeightOfPartnerApproach+(1.-WeightOfPartnerApproach)*sin(swarm[i].speedTheta)*swarm[i].speedRho;
 						swarm[i].speedTheta = atan2(sumY, sumX);
@@ -285,28 +274,7 @@ void updateSwarm(Cockroach *swarm, int *swarmSize, int lightAbscissa, int lightO
 					 
 				}
 				else // no partner so walk mode
-				{
-					/*Rule of beeing alive: if he walks he looses food energy, 
-					if hs no more food energy he has to survive, 
-					then if he hasnt energy to survive he dies */
-					/*if(swarm[i].food_attraction > 0)
-					swarm[i].food_attraction -= Speed_of_digestion;
-					else if(swarm[i].food_attraction <= 0 && swarm[i].capacity_to_survive > 0)
-					swarm[i].capacity_to_survive -= Speed_of_exctinction;
-					else if (swarm[i].food_attraction <= 0 && swarm[i].capacity_to_survive <= 0)*/
-					swarm[i].capacity_to_survive -= SpeedOfDeath;
-					if(swarm[i].capacity_to_survive <= 0) 
-					{							
-						printf("RIP number %d\n", swarm[i].id);
-						adios(swarm, swarmSize, i); //death of little cockroach
-						printf("%d cockroaches left\n", *swarmSize);
-					}
-					if(*swarmSize == 0)
-					{
-						printf("Everybody died... :(\n");
-						exit(0);	
-					}
-					
+				{					
 					{
 						/// Rule 1: avoid being alone
 						double sumX = -0.;
@@ -381,7 +349,7 @@ void updateSwarm(Cockroach *swarm, int *swarmSize, int lightAbscissa, int lightO
 						}
 					}
 					{
-						// Rule: avoid the light
+						// Rule: walking behavior with light presence
 						if (lightAbscissa >= 0 && lightOrdinate >= 0) {
 						
 							const double deltaX = lightAbscissa-swarm[i].x;
@@ -389,11 +357,25 @@ void updateSwarm(Cockroach *swarm, int *swarmSize, int lightAbscissa, int lightO
 							const double hypotenuse = hypot(deltaX, deltaY);
 							if (hypotenuse < lightBubble) 
 							{
-								if(valorisation(swarm[i]) > ValorisationLight)
+								if(valorisation(swarm[i]) > ValorisationLight) // escape light if more sensitive to light than attrated by food
 								{
 									const double sumX = -(lightAbscissa-swarm[i].x)/hypotenuse*WeightOflightEscape+(1.-WeightOflightEscape)*cos(swarm[i].speedTheta)*swarm[i].speedRho;
 									const double sumY = -(lightOrdinate-swarm[i].y)/hypotenuse*WeightOflightEscape+(1.-WeightOflightEscape)*sin(swarm[i].speedTheta)*swarm[i].speedRho;
 									swarm[i].speedTheta = atan2(sumY, sumX);
+								}
+								else // more attracted by food
+								{
+									// Rule 5: go to food areas to eat
+									int i_close_food;
+									double hypothenuse_close_food;
+									indexCloseFood(swarm[i], nb_foodPoints, foodPoints, &i_close_food, &hypothenuse_close_food);
+										if (hypothenuse_close_food > foodPoints[i_close_food].rayon) {
+											swarm[i].mode = Walking;
+											const double sumX = (foodPoints[i_close_food].x-swarm[i].x)/hypothenuse_close_food*WeightOfFoodApproach+(1.-WeightOfFoodApproach)*cos(swarm[i].speedTheta)*swarm[i].speedRho;
+											const double sumY = (foodPoints[i_close_food].y-swarm[i].y)/hypothenuse_close_food*WeightOfFoodApproach+(1.-WeightOfFoodApproach)*sin(swarm[i].speedTheta)*swarm[i].speedRho;
+											swarm[i].speedTheta = atan2(sumY, sumX);
+										}
+										else swarm[i].mode = Eating;
 								}
 								if (rand_a_b(0, 1000) <= ProbaPredateurWalking)
 								{
@@ -406,13 +388,28 @@ void updateSwarm(Cockroach *swarm, int *swarmSize, int lightAbscissa, int lightO
 									}
 								}
 							}
+							else // not under the light so continue going to food
+							{
+									int i_close_food;
+									double hypothenuse_close_food;
+									indexCloseFood(swarm[i], nb_foodPoints, foodPoints, &i_close_food, &hypothenuse_close_food);
+									if (hypothenuse_close_food > foodPoints[i_close_food].rayon) {
+										swarm[i].mode = Walking;
+										const double sumX = (foodPoints[i_close_food].x-swarm[i].x)/hypothenuse_close_food*WeightOfFoodApproach+(1.-WeightOfFoodApproach)*cos(swarm[i].speedTheta)*swarm[i].speedRho;
+										const double sumY = (foodPoints[i_close_food].y-swarm[i].y)/hypothenuse_close_food*WeightOfFoodApproach+(1.-WeightOfFoodApproach)*sin(swarm[i].speedTheta)*swarm[i].speedRho;
+										swarm[i].speedTheta = atan2(sumY, sumX);
+									}
+									else swarm[i].mode = Eating;	
+							}
 						}
 					}
 					{
-						// Rule 5: go to food areas to eat
-						int i_close_food;
-						double hypothenuse_close_food;
-						indexCloseFood(swarm[i], nb_foodPoints, foodPoints, &i_close_food, &hypothenuse_close_food);
+						// Rule: go to food areas to eat when not under light
+						if (lightAbscissa == -1 && lightOrdinate == -1)
+						{
+							int i_close_food;
+							double hypothenuse_close_food;
+							indexCloseFood(swarm[i], nb_foodPoints, foodPoints, &i_close_food, &hypothenuse_close_food);
 							if (hypothenuse_close_food > foodPoints[i_close_food].rayon) {
 								swarm[i].mode = Walking;
 								const double sumX = (foodPoints[i_close_food].x-swarm[i].x)/hypothenuse_close_food*WeightOfFoodApproach+(1.-WeightOfFoodApproach)*cos(swarm[i].speedTheta)*swarm[i].speedRho;
@@ -420,6 +417,7 @@ void updateSwarm(Cockroach *swarm, int *swarmSize, int lightAbscissa, int lightO
 								swarm[i].speedTheta = atan2(sumY, sumX);
 							}
 							else swarm[i].mode = Eating;
+						}
 					}
 				}
 				break;
@@ -428,36 +426,60 @@ void updateSwarm(Cockroach *swarm, int *swarmSize, int lightAbscissa, int lightO
 
 		//important rules below
 		{
-			// Rule: stay in the box
-			bool tooClose = false;
-			double sumX = -0.;
-			double sumY = -0.;
-			const double deltaX = WindowWidth-swarm[i].x;
-			const double deltaY = WindowHeight-swarm[i].y;
-			if (deltaX < MinDistanceFromBoxEdges) 
-			{
-				tooClose = true;
-				sumX = (MinDistanceFromBoxEdges-swarm[i].x)/swarm[i].x*WeightOfEscape+(1.-WeightOfEscape)*cos(swarm[i].speedTheta)*swarm[i].speedRho;
+			{				
+				/*Rule of beeing alive: if he walks he looses food energy, 
+				if hs no more food energy he has to survive, 
+				then if he hasnt energy to survive he dies */
+				/*if(swarm[i].food_attraction > 0)
+				swarm[i].food_attraction -= Speed_of_digestion;
+				else if(swarm[i].food_attraction <= 0 && swarm[i].capacity_to_survive > 0)
+				swarm[i].capacity_to_survive -= Speed_of_exctinction;
+				else if (swarm[i].food_attraction <= 0 && swarm[i].capacity_to_survive <= 0)*/
+				swarm[i].capacity_to_survive -= SpeedOfDeath;
+				if(swarm[i].capacity_to_survive <= 0) 
+				{							
+					printf("RIP number %d\n", swarm[i].id);
+					adios(swarm, swarmSize, i); //death of little cockroach
+					printf("%d cockroaches left\n", *swarmSize);
+				}
+				if(*swarmSize == 0)
+				{
+					printf("Everybody died... :(\n");
+					exit(0);	
+				}
+			}
+			{			
+				// Rule: stay in the box
+				bool tooClose = false;
+				double sumX = -0.;
+				double sumY = -0.;
+				const double deltaX = WindowWidth-swarm[i].x;
+				const double deltaY = WindowHeight-swarm[i].y;
+				if (deltaX < MinDistanceFromBoxEdges) 
+				{
+					tooClose = true;
+					sumX = (MinDistanceFromBoxEdges-swarm[i].x)/swarm[i].x*WeightOfEscape+(1.-WeightOfEscape)*cos(swarm[i].speedTheta)*swarm[i].speedRho;
 
-			}
-			else if (deltaX > WindowWidth-MinDistanceFromBoxEdges) 
-			{
-				tooClose = true;
-				sumX = (( WindowWidth-MinDistanceFromBoxEdges)-swarm[i].x)/swarm[i].x*WeightOfEscape+(1.-WeightOfEscape)*cos(swarm[i].speedTheta)*swarm[i].speedRho;
+				}
+				else if (deltaX > WindowWidth-MinDistanceFromBoxEdges) 
+				{
+					tooClose = true;
+					sumX = (( WindowWidth-MinDistanceFromBoxEdges)-swarm[i].x)/swarm[i].x*WeightOfEscape+(1.-WeightOfEscape)*cos(swarm[i].speedTheta)*swarm[i].speedRho;
 
+				}
+				if (deltaY < MinDistanceFromBoxEdges) 
+				{
+					tooClose = true;
+					sumY = (MinDistanceFromBoxEdges-swarm[i].y)/swarm[i].y*WeightOfEscape+(1.-WeightOfEscape)*sin(swarm[i].speedTheta)*swarm[i].speedRho;
+				}
+				else if (deltaY > WindowHeight-MinDistanceFromBoxEdges) 
+				{
+					tooClose = true;
+					sumY = ((WindowHeight-MinDistanceFromBoxEdges)-swarm[i].y)/swarm[i].y*WeightOfEscape+(1.-WeightOfEscape)*sin(swarm[i].speedTheta)*swarm[i].speedRho;
+				}
+				if(tooClose)
+					swarm[i].speedTheta = atan2(sumY, sumX);
 			}
-			if (deltaY < MinDistanceFromBoxEdges) 
-			{
-				tooClose = true;
-				sumY = (MinDistanceFromBoxEdges-swarm[i].y)/swarm[i].y*WeightOfEscape+(1.-WeightOfEscape)*sin(swarm[i].speedTheta)*swarm[i].speedRho;
-			}
-			else if (deltaY > WindowHeight-MinDistanceFromBoxEdges) 
-			{
-				tooClose = true;
-				sumY = ((WindowHeight-MinDistanceFromBoxEdges)-swarm[i].y)/swarm[i].y*WeightOfEscape+(1.-WeightOfEscape)*sin(swarm[i].speedTheta)*swarm[i].speedRho;
-			}
-			if(tooClose)
-				swarm[i].speedTheta = atan2(sumY, sumX);
 		}
 	}
 	// Update position
