@@ -30,7 +30,7 @@ typedef struct {
 	Mode mode; // a cockroach can walk or eat, that's it
 	double food_attraction;
 	double light_sensitivity;
-	double capacity_to_survive; //jauge bouffe
+	double life; //jauge bouffe
 } Cockroach;
 
 
@@ -51,3 +51,8 @@ void displaySwarmDetails (Cockroach *swarm, const int swarmSize);
 Gender alea_gender();
 const char* getGenderName (Gender gender);
 bool opposite_gender (Gender g1, Gender g2);
+void init_cockroach (Cockroach *swarm, const int idx);
+Cockroach *initializeSwarm(int swarmSize) ;
+void displaySwarm(const Cockroach *swarm, int swarmSize) ;
+void updateSwarm(Cockroach **swarm, int *swarmSize, int lightAbscissa, int lightOrdinate, int nb_foodPoints, POINT *foodPoints, const int day);
+

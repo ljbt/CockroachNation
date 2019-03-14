@@ -13,17 +13,17 @@ TARGET = simulation
 $(TARGET): $(TARGET).o libisentlib.a positionFood.o evolution.o time.o reproduction.o
 	$(CC) -o $@.exe $^ $(LDFLAGS)
 
-$(TARGET).o: $(TARGET).c definitions.h positionFood.h evolution.h time.h
+$(TARGET).o: $(TARGET).c GfxLib.h ESLib.h definitions.h positionFood.h evolution.h time.h reproduction.h
 	$(CC) $(CFLAGS) $<
 
 
-positionFood.o: positionFood.c definitions.h positionFood.h
+positionFood.o: positionFood.c GfxLib.h definitions.h positionFood.h
 	gcc $(CFLAGS) $<
 
 evolution.o: evolution.c definitions.h evolution.h
 	$(CC) $(CFLAGS) $< 
 
-time.o: time.c definitions.h time.h
+time.o: time.c GfxLib.h definitions.h time.h
 	$(CC) $(CFLAGS) $< 
 
 reproduction.o: reproduction.c definitions.h reproduction.h

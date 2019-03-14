@@ -6,6 +6,7 @@
 #include <time.h>
 
 #include "definitions.h"
+#include "evolution.h"
 
 
 // function that kills a cockroach, so the array of swarm is reduced by one

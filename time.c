@@ -5,7 +5,6 @@
 #include <stdbool.h>
 #include <time.h>
 #include "GfxLib.h"		// To do simple graphics
-#include "ESLib.h"		// For valeurAleatoire()
 
 #include "definitions.h"
 #include "time.h"
