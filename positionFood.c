@@ -6,6 +6,18 @@
 #include "definitions.h"
 #include "positionFood.h"
 
+POINT* currentLight (Cockroach insect, int nb_lightPoints, POINT *lightPoints)
+{
+  	for (int i = 0; i<nb_lightPoints; i++){
+      	double deltaX = lightPoints[i].x - insect.x;
+      	double deltaY = lightPoints[i].y - insect.y;
+        double hypotenuse = hypot(deltaX, deltaY);
+      	if (hypotenuse < lightPoints[i].rayon){
+          	return &(lightPoints[i]);
+        }
+    }
+    return NULL;
+}
 
 void create_and_displayLight(POINT* lightPoints, int nb_lightPoints)
 {
@@ -23,8 +35,8 @@ POINT positionLightArea(void)
     POINT lightPoint;
     lightPoint.x = rand_a_b(0,WindowWidth);
     lightPoint.y = rand_a_b(0,WindowHeight);
-    lightPoint.rayon = rand_a_b(20, 60);
-  	lightPoint.time = rand_a_b(100, 200);
+    lightPoint.rayon = rand_a_b(30, 80);
+  	lightPoint.time = rand_a_b(500, 1000);
     return lightPoint;
 }
 
