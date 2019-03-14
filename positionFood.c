@@ -21,7 +21,7 @@ POINT* currentLight (Cockroach insect, int nb_lightPoints, POINT *lightPoints)
 
 void create_and_displayLight(POINT* lightPoints, int nb_lightPoints)
 {
-	couleurCourante(255, 235, 0);
+	couleurCourante(255, 235, 125);
     for(int i=0; i<nb_lightPoints; ++i){
 		if (lightPoints[i].time <= 0)
 			lightPoints[i] = positionLightArea();

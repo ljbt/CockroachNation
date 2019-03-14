@@ -14,7 +14,7 @@
 #include "reproduction.h"
 
 
-int NumberOfCockroachs = 20;
+int NumberOfCockroachs = 50;
 const double PowerForWeights = 3;	// To decrease or increase the influence of the distance
 const double Horizon = 100.;		// Units to look for neighbors
 const double WeightOfNeighbors = .1;
@@ -373,7 +373,7 @@ void updateSwarm(Cockroach **swarm, int *swarmSize, int lightAbscissa, int light
                       	  int lightY = lightOrdinate;
                       
                      	  if ((lightAbscissa >= 0 && lightOrdinate >= 0 && hypotenuse < lightBubble) || (light != NULL)) {
-                            	if (lightAbscissa < 0 || lightOrdinate < 0 || hypotenuse < lightBubble){
+                            	if (lightAbscissa < 0 || lightOrdinate < 0 || hypotenuse >= lightBubble){
                             		lightX = light->x; 
                                   	lightY = light->y;
                                   	deltaX = lightX-(*swarm)[i].x;
@@ -558,12 +558,12 @@ void gestionEvenement(EvenementGfx event) {
 
 		case Affichage:
 			effaceFenetre (255, 255, 255);
+			create_and_displayLight(lightPoints,nb_lightPoints);
 			if (displaylight)
 			{
 				couleurCourante(255, 235, 0);
 				circle(abscisseSouris(), ordonneeSouris(), lightBubble);
 			}
-			create_and_displayLight(lightPoints,nb_lightPoints);
 			create_and_displayFood(foodPoints,nb_foodPoints);
 			displaySwarm(cockroach, NumberOfCockroachs);
 			display_day(day);
