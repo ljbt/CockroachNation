@@ -15,6 +15,7 @@ void computes_day(int *day, int *num_iteration)
 {
     if (*num_iteration > MAX_ITERATION ) {
         (*day)++;
+        printf("\nDAY %d\n",*day);
         (*num_iteration) = 0;
     }
 }

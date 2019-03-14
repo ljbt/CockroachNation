@@ -14,7 +14,7 @@
 #include "reproduction.h"
 
 
-int NumberOfCockroachs = 20;
+int NumberOfCockroachs = 100;
 const double PowerForWeights = 3;	// To decrease or increase the influence of the distance
 const double Horizon = 100.;		// Units to look for neighbors
 const double WeightOfNeighbors = .1;
@@ -38,7 +38,7 @@ const double WeightOfPartnerApproach = .3;
 const double EatValue = 5.0;
 const double SpeedOfDeath = 0.1;
 const double ValorisationLight = 50.0;
-const double MaxLife = 100.0;
+const double MaxLife = 200.;
 const double SeuilSurvie = 10.0;
 const double ProbaPredateurEating = 2.0; // Chance sur 1000
 const double ProbaPredateurWalking = 1.0; // Chance sur 1000
@@ -150,7 +150,7 @@ void init_cockroach (Cockroach *swarm, const int idx)
 				.mode = Walking,
 				.food_attraction = rand_a_b(0, 100), // entre 0 et 100 
 				.light_sensitivity = rand_a_b(0, 100) ,
-				.life = MaxLife // max de la jauge
+				.life = rand_a_b(100,MaxLife)
 	};
 }
 
@@ -177,7 +177,6 @@ void displaySwarm(const Cockroach *swarm, int swarmSize)
 }
 
 void updateSwarm(Cockroach **swarm, int *swarmSize, int lightAbscissa, int lightOrdinate, int nb_foodPoints, POINT *foodPoints, const int day) {
-
 	for (int i = 0; i < *swarmSize; ++i) {	// All the individuals
 
 		bool possiblePartner = false;
@@ -287,7 +286,7 @@ void updateSwarm(Cockroach **swarm, int *swarmSize, int lightAbscissa, int light
 					}
 				}
 				else // no partner so walk mode
-				{	
+				{
 					{
 						/// Rule 1: avoid being alone
 						double sumX = -0.;
@@ -454,7 +453,6 @@ void updateSwarm(Cockroach **swarm, int *swarmSize, int lightAbscissa, int light
 						printf("Everybody died... :(\n");
 						exit(0);	
 					}
-					continue; //We need to avoid using i after the realloc, we can have error if we are at the end of an array ! 
 				}
 			}
 			{			
@@ -491,6 +489,7 @@ void updateSwarm(Cockroach **swarm, int *swarmSize, int lightAbscissa, int light
 			}
 		}
 	}
+		printf("size = %d\n", *swarmSize);
 	// Update position
 	for (int i = 0; i < *swarmSize; ++i) {
 		(*swarm)[i].x += (*swarm)[i].speedRho*cos((*swarm)[i].speedTheta);
@@ -558,6 +557,7 @@ void gestionEvenement(EvenementGfx event) {
 				case 'r':
 					free(cockroach);
 					cockroach = initializeSwarm(NumberOfCockroachs);
+					day = 1;
 					break;
 			}
 			break;
