@@ -254,6 +254,7 @@ void updateSwarm(Cockroach **swarm, int *swarmSize, int lightAbscissa, int light
 											printf("Everybody died... :(\n");
 											exit(0);
 										}
+										continue; //We need to avoid using i after the realloc, we can have error if we are at the end of an array ! 
 									}
 								}
 							}
@@ -398,6 +399,7 @@ void updateSwarm(Cockroach **swarm, int *swarmSize, int lightAbscissa, int light
 										printf("Everybody died... :(\n");
 										exit(0);
 									}
+									continue; //We need to avoid using i after the realloc, we can have error if we are at the end of an array ! 
 								}
 							}
 							else // not under the light so continue going to food
@@ -447,11 +449,12 @@ void updateSwarm(Cockroach **swarm, int *swarmSize, int lightAbscissa, int light
 					printf("RIP number %d\n", (*swarm)[i].id);
 					adios((*swarm), swarmSize, i); //death of little cockroach
 					printf("%d cockroaches left\n", *swarmSize);
-				}
-				if(*swarmSize == 0)
-				{
-					printf("Everybody died... :(\n");
-					exit(0);	
+					if(*swarmSize == 0)
+					{
+						printf("Everybody died... :(\n");
+						exit(0);	
+					}
+					continue; //We need to avoid using i after the realloc, we can have error if we are at the end of an array ! 
 				}
 			}
 			{			
@@ -493,6 +496,7 @@ void updateSwarm(Cockroach **swarm, int *swarmSize, int lightAbscissa, int light
 		(*swarm)[i].x += (*swarm)[i].speedRho*cos((*swarm)[i].speedTheta);
 		(*swarm)[i].y += (*swarm)[i].speedRho*sin((*swarm)[i].speedTheta);
 	}
+	
 }
 
 int main(int argc, char *argv[]) {

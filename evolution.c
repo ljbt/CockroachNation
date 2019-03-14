@@ -10,13 +10,22 @@
 
 
 // function that kills a cockroach, so the array of swarm is reduced by one
-void adios(Cockroach *swarm, int *swarmSize, int idx_death)
+Cockroach* adios(Cockroach *swarm, int *swarmSize, int idx_death)
 {
-    for(int i = idx_death; i < *swarmSize; i++)
+	int i;
+    for(i = idx_death; i < *swarmSize-1; i++) // swarsize-1 because we do not want to update the last element of the array
     {
         swarm[i] = swarm[i+1];
-    }
+    } 
     (*swarmSize)--;
+    //realloc is done to avoid unused cockroach in memory and to avoid error when using realloc elsewhere (for instance in reproduction)
+    Cockroach *new_swarm;
+	new_swarm = (Cockroach *)realloc(swarm, sizeof(*new_swarm) * (*swarmSize));
+	if (new_swarm == NULL) {
+		perror("realloc");
+		exit(1);
+	}
+	return new_swarm;
 }
 
 void cockroach_evolution(Cockroach *insect,int num_insect, int day)
