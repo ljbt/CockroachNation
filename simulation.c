@@ -13,9 +13,6 @@
 #include "time.h"
 #include "reproduction.h"
 
-#ifndef M_PI
-#define M_PI 3.141592654
-#endif
 
 int NumberOfCockroachs = 40;
 const double PowerForWeights = 3;	// To decrease or increase the influence of the distance
@@ -143,7 +140,7 @@ Cockroach *initializeSwarm(int swarmSize)
 			.adult_date = rand_a_b(1,6), //time from larva to adult (between 2 and 6 days here)
 			.time_for_reproduction = false,
 			.last_reproduction_day = 0, // no reproduction yet
-			swarm[i].mode = Walking,
+			.mode = Walking,
 			.food_attraction = groupBaseEat + (rand_a_b(0, 20) - 10), // entre 0 et 100 car de base entre 0 et 90 et on ajoute ou enleve 10
 			.light_sensitivity = groupBaseLight + (rand_a_b(0, 20) - 10),
 			.capacity_to_survive = MaxLife // max de la jauge
