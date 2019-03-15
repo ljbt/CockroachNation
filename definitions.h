@@ -55,4 +55,5 @@ bool opposite_gender (Gender g1, Gender g2);
 void init_cockroach (Cockroach *swarm, const int idx);
 Cockroach *initializeSwarm(int swarmSize) ;
 void displaySwarm(const Cockroach *swarm, int swarmSize) ;
-void updateSwarm(Cockroach **swarm, int *swarmSize, int lightAbscissa, int lightOrdinate, int nb_foodPoints, POINT *foodPoints, int nb_lightPoints, POINT* lightPoints, const int day);
+void displayDeads(POINT* deads, int nb_deads) ;
+void updateSwarm(Cockroach **swarm, int *swarmSize, int lightAbscissa, int lightOrdinate, int nb_foodPoints, POINT *foodPoints, int nb_lightPoints, POINT* lightPoints, int* nb_deads, POINT* deads, const int day);
