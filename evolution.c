@@ -35,7 +35,7 @@ void cockroach_evolution(Cockroach *insect,int num_insect, int day)
     if(insect->adult_date == day && insect->growth == Larva) // larva to adult
     {   
         insect->growth = Adult;
-        printf("%d is now a %s adult, find the one !\n", insect->id, getGenderName(insect->gender));
+        printf("%d is now a %s adult !\n", insect->id, getGenderName(insect->gender));
         insect->time_for_reproduction = true;
     }
 }

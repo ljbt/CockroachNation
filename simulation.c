@@ -188,8 +188,10 @@ void displayDeads(POINT* deads, int nb_deads)
 		circle(deads[i].x, deads[i].y, 2);
 }
 
-void updateSwarm(Cockroach **swarm, int *swarmSize, int lightAbscissa, int lightOrdinate, int nb_foodPoints, POINT *foodPoints, int nb_lightPoints, POINT* lightPoints,  int* nb_deads, POINT* deads, const int day) {
-	//*nb_deads = 0;
+void updateSwarm(Cockroach **swarm, int *swarmSize, int lightAbscissa, int lightOrdinate, 
+								int nb_foodPoints, POINT *foodPoints, int nb_lightPoints, POINT* lightPoints,  
+								int* nb_deads, POINT* deads, const int day) 
+{
 	for (int i = 0; i < *swarmSize; ++i) {	// All the individuals
 		bool possiblePartner = false;
 		int i_close_partner = -1;
@@ -249,7 +251,8 @@ void updateSwarm(Cockroach **swarm, int *swarmSize, int lightAbscissa, int light
 						const double hypotenuse = hypot(deltaX, deltaY);
 						POINT* light = currentLight((*swarm)[i], nb_lightPoints, lightPoints);
 				
-					if ((lightAbscissa >= 0 && lightOrdinate >= 0 && hypotenuse < lightBubble) || (light != NULL)) {
+					if ((lightAbscissa >= 0 && lightOrdinate >= 0 && hypotenuse < lightBubble) || (light != NULL)) 
+					{
 						{
 								if (valorisation((*swarm)[i]) > ValorisationLight)
 								{
@@ -269,7 +272,7 @@ void updateSwarm(Cockroach **swarm, int *swarmSize, int lightAbscissa, int light
 														printf("Everybody died... :(\n");
 														exit(0);
 												}
-												continue; //We need to avoid using i after the realloc, we can have error if we are at the end of an array ! 
+												continue; // // actual insect died so we pass to the others ! 
 										}
 								}
 						}
@@ -300,7 +303,7 @@ void updateSwarm(Cockroach **swarm, int *swarmSize, int lightAbscissa, int light
 						reproduction(swarm,i,i_close_partner,swarmSize,day);  // crossover and all in this function !
 					}
 				}
-				else // no partner so walk mode
+				else // no partner so WALK MODE
 				{
 					{
 						/// Rule 1: avoid being alone
@@ -328,7 +331,7 @@ void updateSwarm(Cockroach **swarm, int *swarmSize, int lightAbscissa, int light
 							(*swarm)[i].speedTheta = atan2(sumY/normalization, sumX/normalization);
 						}
 					}
-/* 					{
+					/*{
 						// Rule 3: mimic the neighbors
 						double sumX = -0.;
 						double sumY = -0.;
@@ -459,7 +462,8 @@ void updateSwarm(Cockroach **swarm, int *swarmSize, int lightAbscissa, int light
 						}
 					}
 				}
-				/*Rule of beeing alive: if he walks he looses energy*/
+
+				/*Rule : if he walks he looses energy*/
 				(*swarm)[i].life -= SpeedOfDeath;
 
 				break;

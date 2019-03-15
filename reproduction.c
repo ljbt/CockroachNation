@@ -107,9 +107,6 @@ void init_larva (Cockroach *swarm, const int idx, const int idx_parent_1, const 
 		.time_for_reproduction = false,
 		.last_reproduction_day = birthday, // no reproduction yet
 		.mode = Walking,
-/* 				.food_attraction = rand_a_b(0, 100), // entre 0 et 100 
-				.light_sensitivity = rand_a_b(0, 100) ,
-				.life = 100  */
 	};
 }
 
@@ -123,8 +120,6 @@ void createLarva(Cockroach **swarm, int idx_parent_1, int idx_parent_2, int *swa
     int idx_larva = (*swarmSize)-1;
     init_larva((*swarm),idx_larva,idx_parent_1,idx_parent_2,birthday,new_id);
     genetic_evolution(*swarm,idx_larva,idx_parent_1,idx_parent_2);
-/*     printf("larva: life = %f, fodd attraction = %f, light sensitive = %f\n", 
-        (*swarm)[idx_larva].life, (*swarm)[idx_larva].food_attraction,(*swarm)[idx_larva].light_sensitivity); */
 }
 
 
@@ -138,6 +133,12 @@ void reproduction (Cockroach **swarm, int idx_parent_1, int idx_parent_2, int *s
 
     int nb_larva = rand_a_b(2,4);
     printf("Birth of %d larva\n", nb_larva);
+
+    printf("parent 1: life = %f, food attraction = %f, light sensitive = %f\n", 
+        (*swarm)[idx_parent_1].life, (*swarm)[idx_parent_1].food_attraction,(*swarm)[idx_parent_1].light_sensitivity);
+    printf("parent 2: life = %f, food attraction = %f, light sensitive = %f\n", 
+        (*swarm)[idx_parent_2].life, (*swarm)[idx_parent_2].food_attraction,(*swarm)[idx_parent_2].light_sensitivity);
+
     for(int i = 0; i < nb_larva; i++)
     {
         createLarva(swarm,idx_parent_1,idx_parent_2,swarmSize, day);

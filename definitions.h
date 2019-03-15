@@ -28,9 +28,9 @@ typedef struct {
 	bool time_for_reproduction;
 	int last_reproduction_day;
 	Mode mode; // a cockroach can walk or eat, that's it
-	double food_attraction;
-	double light_sensitivity;
-	double life; //jauge bouffe
+	double food_attraction; // gene
+	double light_sensitivity; // gene
+	double life; // gene
 } Cockroach;
 
 
