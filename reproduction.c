@@ -25,11 +25,6 @@ void indexClosePartner(Cockroach *swarm,int num_insect, int swarmSize ,int *inde
     double deltaX;
 	double deltaY;
 	double hypotenuse;
-
-/*     Gender opposite_gender;
-    if(swarm[num_insect].gender == Male) opposite_gender = Female;
-    else opposite_gender == Male; */
-
     bool oppos_gender;
 
     for(int i = 0; i < swarmSize; i++)
@@ -37,12 +32,7 @@ void indexClosePartner(Cockroach *swarm,int num_insect, int swarmSize ,int *inde
         // conditions for beeing a good partner: not himself, opposite gender, in Reproducting mode
         if(i != num_insect)
         {
-            oppos_gender = opposite_gender(swarm[i].gender,swarm[num_insect].gender);
-            if (oppos_gender)
-            {
-//                printf("diff gender between %s %d and %s %d\n", getGenderName(swarm[num_insect].gender),swarm[num_insect].id, getGenderName(swarm[i].gender), swarm[i].id);
-//                printf("time for reproduction for %d?: %d\n", swarm[i].id, swarm[i].time_for_reproduction);
-            }           
+            oppos_gender = opposite_gender(swarm[i].gender,swarm[num_insect].gender);        
             if (oppos_gender && swarm[i].time_for_reproduction)
             {
                 deltaX = swarm[i].x-swarm[num_insect].x;
@@ -53,7 +43,6 @@ void indexClosePartner(Cockroach *swarm,int num_insect, int swarmSize ,int *inde
                     *little_hypotenuse = hypotenuse;
                     *indexClosePartner = i;
                 }
-//                printf("dist = %f and little hypot = %f\n", hypotenuse, *little_hypotenuse);
             }
         }
     }

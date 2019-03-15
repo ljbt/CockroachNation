@@ -148,7 +148,7 @@ void init_cockroach (Cockroach *swarm, const int idx)
 				.speedTheta = valeurAleatoire()*2.*M_PI,	// GroupSpeedTheta
 				.gender = alea_gender(), // male or female
 				.growth = Larva, // larva by default
-				.adult_date = rand_a_b(1,6), //time from larva to adult (between 2 and 6 days here)
+				.adult_date = rand_a_b(1,6), //date for larva to become adult (between 2 and 6 days here)
 				.time_for_reproduction = false,
 				.last_reproduction_day = 0, // no reproduction yet
 				.mode = Walking,
@@ -161,10 +161,6 @@ void init_cockroach (Cockroach *swarm, const int idx)
 Cockroach *initializeSwarm(int swarmSize) 
 {
 	Cockroach *swarm = (Cockroach*)calloc(swarmSize, sizeof(Cockroach));
-/*	double groupBaseEat = rand_a_b(10, 90); // valeur entre 10 et 90
-		double groupBaseLight = rand_a_b(10, 90); // valeur entre 10 et 90
- 			.food_attraction = groupBaseEat + (rand_a_b(0, 20) - 10), // entre 0 et 100 car de base entre 0 et 90 et on ajoute ou enleve 10
-			.light_sensitivity = groupBaseLight + (rand_a_b(0, 20) - 10), */
 	for (int i = 0; i < swarmSize; ++i) 
 	{
 		init_cockroach(swarm, i);
@@ -380,70 +376,72 @@ void updateSwarm(Cockroach **swarm, int *swarmSize, int lightAbscissa, int light
 					}
 					{
 						// Rule: walking behavior with light presence
-                     	  double deltaX = lightAbscissa-(*swarm)[i].x;
-                          double deltaY = lightOrdinate-(*swarm)[i].y;
-                          double hypotenuse = hypot(deltaX, deltaY);
-                       	  POINT* light = currentLight((*swarm)[i], nb_lightPoints, lightPoints);
-                      	  int lightX = lightAbscissa;
-                      	  int lightY = lightOrdinate;
-                      
-                     	  if ((lightAbscissa >= 0 && lightOrdinate >= 0 && hypotenuse < lightBubble) || (light != NULL)) {
-                            	if (lightAbscissa < 0 || lightOrdinate < 0 || hypotenuse >= lightBubble){
-                            		lightX = light->x; 
-                                  	lightY = light->y;
-                                  	deltaX = lightX-(*swarm)[i].x;
-                                    deltaY = lightY-(*swarm)[i].y;
-                                    hypotenuse = hypot(deltaX, deltaY);
-                        		}
-								if(valorisation((*swarm)[i]) > ValorisationLight) // escape light if more sensitive to light than attrated by food
-								{
-									const double sumX = -(lightX-(*swarm)[i].x)/hypotenuse*WeightOflightEscape+(1.-WeightOflightEscape)*cos((*swarm)[i].speedTheta)*(*swarm)[i].speedRho;
-									const double sumY = -(lightY-(*swarm)[i].y)/hypotenuse*WeightOflightEscape+(1.-WeightOflightEscape)*sin((*swarm)[i].speedTheta)*(*swarm)[i].speedRho;
+            double deltaX = lightAbscissa-(*swarm)[i].x;
+						double deltaY = lightOrdinate-(*swarm)[i].y;
+						double hypotenuse = hypot(deltaX, deltaY);
+						POINT* light = currentLight((*swarm)[i], nb_lightPoints, lightPoints);
+						int lightX = lightAbscissa;
+						int lightY = lightOrdinate;
+							
+						if ((lightAbscissa >= 0 && lightOrdinate >= 0 && hypotenuse < lightBubble) || (light != NULL)) 
+						{
+							if (lightAbscissa < 0 || lightOrdinate < 0 || hypotenuse >= lightBubble)
+							{
+								lightX = light->x; 
+								lightY = light->y;
+								deltaX = lightX-(*swarm)[i].x;
+								deltaY = lightY-(*swarm)[i].y;
+								hypotenuse = hypot(deltaX, deltaY);
+							}
+							if(valorisation((*swarm)[i]) > ValorisationLight) // escape light if more sensitive to light than attrated by food
+							{
+								const double sumX = -(lightX-(*swarm)[i].x)/hypotenuse*WeightOflightEscape+(1.-WeightOflightEscape)*cos((*swarm)[i].speedTheta)*(*swarm)[i].speedRho;
+								const double sumY = -(lightY-(*swarm)[i].y)/hypotenuse*WeightOflightEscape+(1.-WeightOflightEscape)*sin((*swarm)[i].speedTheta)*(*swarm)[i].speedRho;
+								(*swarm)[i].speedTheta = atan2(sumY, sumX);
+							}
+						else // more attracted by food
+						{
+							// Rule 5: go to food areas to eat
+							int i_close_food;
+							double hypothenuse_close_food;
+							indexCloseFood((*swarm)[i], nb_foodPoints, foodPoints, &i_close_food, &hypothenuse_close_food);
+								if (hypothenuse_close_food > foodPoints[i_close_food].rayon) {
+									(*swarm)[i].mode = Walking;
+									const double sumX = (foodPoints[i_close_food].x-(*swarm)[i].x)/hypothenuse_close_food*WeightOfFoodApproach+(1.-WeightOfFoodApproach)*cos((*swarm)[i].speedTheta)*(*swarm)[i].speedRho;
+									const double sumY = (foodPoints[i_close_food].y-(*swarm)[i].y)/hypothenuse_close_food*WeightOfFoodApproach+(1.-WeightOfFoodApproach)*sin((*swarm)[i].speedTheta)*(*swarm)[i].speedRho;
 									(*swarm)[i].speedTheta = atan2(sumY, sumX);
 								}
-								else // more attracted by food
-								{
-									// Rule 5: go to food areas to eat
-									int i_close_food;
-									double hypothenuse_close_food;
-									indexCloseFood((*swarm)[i], nb_foodPoints, foodPoints, &i_close_food, &hypothenuse_close_food);
-										if (hypothenuse_close_food > foodPoints[i_close_food].rayon) {
-											(*swarm)[i].mode = Walking;
-											const double sumX = (foodPoints[i_close_food].x-(*swarm)[i].x)/hypothenuse_close_food*WeightOfFoodApproach+(1.-WeightOfFoodApproach)*cos((*swarm)[i].speedTheta)*(*swarm)[i].speedRho;
-											const double sumY = (foodPoints[i_close_food].y-(*swarm)[i].y)/hypothenuse_close_food*WeightOfFoodApproach+(1.-WeightOfFoodApproach)*sin((*swarm)[i].speedTheta)*(*swarm)[i].speedRho;
-											(*swarm)[i].speedTheta = atan2(sumY, sumX);
-										}
-										else (*swarm)[i].mode = Eating;
-								}
-								if (rand_a_b(0, 1000) <= ProbaPredateurWalking)
-								{
-									printf("hey number %d died because of PREDATOR while walking\n", i);
-									deads[*nb_deads].x = (*swarm)[i].x; // Add the cockroach to the list of dead to display a red circle
-									deads[*nb_deads].y = (*swarm)[i].y; // Add the cockroach to the list of dead to display a red circle
-                                    (*nb_deads)++;//Increase the number of deads
-                                    adios((*swarm), swarmSize, i); //death of little cockroach
-									if(*swarmSize == 0)
-									{
-										printf("Everybody died... :(\n");
-										exit(0);
-									}
-									continue; //We need to avoid using i after the realloc, we can have error if we are at the end of an array ! 
-								}
-							}
-							else // not under the light so continue going to food
-							{
-									int i_close_food;
-									double hypothenuse_close_food;
-									indexCloseFood((*swarm)[i], nb_foodPoints, foodPoints, &i_close_food, &hypothenuse_close_food);
-									if (hypothenuse_close_food > foodPoints[i_close_food].rayon) {
-										(*swarm)[i].mode = Walking;
-										const double sumX = (foodPoints[i_close_food].x-(*swarm)[i].x)/hypothenuse_close_food*WeightOfFoodApproach+(1.-WeightOfFoodApproach)*cos((*swarm)[i].speedTheta)*(*swarm)[i].speedRho;
-										const double sumY = (foodPoints[i_close_food].y-(*swarm)[i].y)/hypothenuse_close_food*WeightOfFoodApproach+(1.-WeightOfFoodApproach)*sin((*swarm)[i].speedTheta)*(*swarm)[i].speedRho;
-										(*swarm)[i].speedTheta = atan2(sumY, sumX);
-									}
-									else (*swarm)[i].mode = Eating;	
-							}
+								else (*swarm)[i].mode = Eating;
 						}
+						if (rand_a_b(0, 1000) <= ProbaPredateurWalking)
+						{
+							printf("hey number %d died because of PREDATOR while walking\n", i);
+							deads[*nb_deads].x = (*swarm)[i].x; // Add the cockroach to the list of dead to display a red circle
+							deads[*nb_deads].y = (*swarm)[i].y; // Add the cockroach to the list of dead to display a red circle
+																(*nb_deads)++;//Increase the number of deads
+																adios((*swarm), swarmSize, i); //death of little cockroach
+							if(*swarmSize == 0)
+							{
+								printf("Everybody died... :(\n");
+								exit(0);
+							}
+							continue; //We need to avoid using i after the realloc, we can have error if we are at the end of an array ! 
+						}
+					}
+					else // not under the light so continue going to food
+					{
+							int i_close_food;
+							double hypothenuse_close_food;
+							indexCloseFood((*swarm)[i], nb_foodPoints, foodPoints, &i_close_food, &hypothenuse_close_food);
+							if (hypothenuse_close_food > foodPoints[i_close_food].rayon) {
+								(*swarm)[i].mode = Walking;
+								const double sumX = (foodPoints[i_close_food].x-(*swarm)[i].x)/hypothenuse_close_food*WeightOfFoodApproach+(1.-WeightOfFoodApproach)*cos((*swarm)[i].speedTheta)*(*swarm)[i].speedRho;
+								const double sumY = (foodPoints[i_close_food].y-(*swarm)[i].y)/hypothenuse_close_food*WeightOfFoodApproach+(1.-WeightOfFoodApproach)*sin((*swarm)[i].speedTheta)*(*swarm)[i].speedRho;
+								(*swarm)[i].speedTheta = atan2(sumY, sumX);
+							}
+							else (*swarm)[i].mode = Eating;	
+					}
+				}
 					}
 					{
 						// Rule: go to food areas to eat when not under light
