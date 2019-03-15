@@ -326,7 +326,7 @@ void updateSwarm(Cockroach **swarm, int *swarmSize, int lightAbscissa, int light
 							(*swarm)[i].speedTheta = atan2(sumY/normalization, sumX/normalization);
 						}
 					}
-					{
+/* 					{
 						// Rule 3: mimic the neighbors
 						double sumX = -0.;
 						double sumY = -0.;
@@ -350,7 +350,7 @@ void updateSwarm(Cockroach **swarm, int *swarmSize, int lightAbscissa, int light
 							sumY = sumY/normalization*WeightOfMimic+(1.-WeightOfMimic)*sin((*swarm)[i].speedTheta)*(*swarm)[i].speedRho;
 							//(*swarm)[i].speedTheta = atan2(sumY, sumX);
 						}
-					}
+					} */
 
 					{
 						// Rule 2: don't move too close
