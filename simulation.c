@@ -178,8 +178,16 @@ void displaySwarm(const Cockroach *swarm, int swarmSize)
 		point(swarm[i].x, swarm[i].y);//, 1);
 }
 
-void updateSwarm(Cockroach **swarm, int *swarmSize, int lightAbscissa, int lightOrdinate, int nb_foodPoints, POINT *foodPoints, int nb_lightPoints, POINT* lightPoints, const int day) {
+void displayDeads(POINT* deads, int nb_deads) 
+{
+	epaisseurDeTrait(2);
+	couleurCourante(255, 0, 0);
+	for (int i = 0; i < nb_deads; i++)
+		circle(deads[i].x, deads[i].y, 2);
+}
 
+void updateSwarm(Cockroach **swarm, int *swarmSize, int lightAbscissa, int lightOrdinate, int nb_foodPoints, POINT *foodPoints, int nb_lightPoints, POINT* lightPoints,  int* nb_deads, POINT* deads, const int day) {
+	//*nb_deads = 0;
 	for (int i = 0; i < *swarmSize; ++i) {	// All the individuals
 
 		bool possiblePartner = false;
@@ -251,6 +259,9 @@ void updateSwarm(Cockroach **swarm, int *swarmSize, int lightAbscissa, int light
                                   if (rand_a_b(0, 1000) <= ProbaPredateurEating)
                                   {
                                       printf("hey number %d died because of PREDATOR while eating\n", i);
+                                      deads[*nb_deads].x = (*swarm)[i].x; // Add the cockroach to the list of dead to display a red circle
+									  deads[*nb_deads].y = (*swarm)[i].y; // Add the cockroach to the list of dead to display a red circle
+                                      (*nb_deads)++;//Increase the number of deads
                                       adios((*swarm), swarmSize, i); //death of little cockroach
                                       if(*swarmSize == 0)
                                       {
@@ -403,7 +414,10 @@ void updateSwarm(Cockroach **swarm, int *swarmSize, int lightAbscissa, int light
 								if (rand_a_b(0, 1000) <= ProbaPredateurWalking)
 								{
 									printf("hey number %d died because of PREDATOR while walking\n", i);
-									adios((*swarm), swarmSize, i); //death of little cockroach
+									deads[*nb_deads].x = (*swarm)[i].x; // Add the cockroach to the list of dead to display a red circle
+									deads[*nb_deads].y = (*swarm)[i].y; // Add the cockroach to the list of dead to display a red circle
+                                    (*nb_deads)++;//Increase the number of deads
+                                    adios((*swarm), swarmSize, i); //death of little cockroach
 									if(*swarmSize == 0)
 									{
 										printf("Everybody died... :(\n");
@@ -535,6 +549,10 @@ void gestionEvenement(EvenementGfx event) {
 	static int nb_lightPoints;
 	static POINT *lightPoints = NULL; 
 	
+	
+	static int nb_deads = 0;
+	static POINT *deads = NULL; 
+	
 	static int day = 1, iteration = 0;
 	
 	switch (event) {
@@ -546,12 +564,15 @@ void gestionEvenement(EvenementGfx event) {
 			foodPoints = positionsFoodAreas(nb_foodPoints);
 			nb_lightPoints = rand_a_b(3,nb_max_lightPoints+1);
 			lightPoints = positionsLightAreas(nb_lightPoints);
+			deads = malloc(sizeof(POINT) * NumberOfCockroachs*10);
 			break;
 
 		case Temporisation:
 			iteration++;
 			computes_day(&day,&iteration);
-			updateSwarm(&cockroach, &NumberOfCockroachs, lightAbscissa, lightOrdinate, nb_foodPoints, foodPoints, nb_lightPoints, lightPoints, day);
+			if (iteration%25 == 0)
+				nb_deads = 0; 
+			updateSwarm(&cockroach, &NumberOfCockroachs, lightAbscissa, lightOrdinate, nb_foodPoints, foodPoints, nb_lightPoints, lightPoints, &nb_deads, deads, day);
 			rafraichisFenetre();
 			break;
 
@@ -565,6 +586,7 @@ void gestionEvenement(EvenementGfx event) {
 			}
 			create_and_displayFood(foodPoints,nb_foodPoints);
 			displaySwarm(cockroach, NumberOfCockroachs);
+			displayDeads(deads, nb_deads);
 			display_day(day);
 			break;
 
