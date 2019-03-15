@@ -5,6 +5,8 @@
 #include <stdbool.h>
 #include <time.h>
 
+#include "ESLib.h"		// For valeurAleatoire()
+
 #include "definitions.h"
 #include "evolution.h"
 
@@ -33,7 +35,35 @@ void cockroach_evolution(Cockroach *insect,int num_insect, int day)
     if(insect->adult_date == day && insect->growth == Larva) // larva to adult
     {   
         insect->growth = Adult;
-        printf("%d is now a %s adult, let's fuck !\n", insect->id, getGenderName(insect->gender));
+        printf("%d is now a %s adult, find the one !\n", insect->id, getGenderName(insect->gender));
         insect->time_for_reproduction = true;
     }
+}
+
+ int crossover(int gene1, int gene2)
+{
+	const int mask = valeurAleatoire()*65536;
+	return (gene1 & mask) | (gene2 & ~mask);
+}
+
+int mutation(int gene, int maxValue)
+{
+	const int bitNumber = valeurAleatoire()*32;
+	return ((gene ^ (1<<bitNumber))&1023)%maxValue;
+}
+
+void genetic_evolution (Cockroach *swarm, const int idx, const int idx_parent_1, const int idx_parent_2)
+{
+    // crossover between each parent gene
+    swarm[idx].life = crossover(swarm[idx_parent_1].life,swarm[idx_parent_2].life);
+    swarm[idx].light_sensitivity = crossover(swarm[idx_parent_1].light_sensitivity,swarm[idx_parent_2].light_sensitivity);
+    swarm[idx].food_attraction = crossover(swarm[idx_parent_1].food_attraction,swarm[idx_parent_2].food_attraction);
+
+    // mutation of each gene
+    int lifeMaxValue = swarm[idx].life + 150 ;
+    swarm[idx].life = mutation(swarm[idx].life,lifeMaxValue);
+    int lightMaxValue = swarm[idx].light_sensitivity + 150;
+    swarm[idx].light_sensitivity = mutation(swarm[idx].light_sensitivity,lightMaxValue);
+    int foodMaxValue = swarm[idx].food_attraction + 150;
+    swarm[idx].food_attraction = mutation(swarm[idx].food_attraction,foodMaxValue);
 }

@@ -5,10 +5,10 @@
 #include <stdbool.h>
 #include <time.h>
 
-#include "GfxLib.h"		// To do simple graphics
 #include "ESLib.h"		// For valeurAleatoire()
 
 #include "definitions.h"
+#include "evolution.h"
 
 
 void time_for_reproduction_or_not(Cockroach *insect, const int nb_min_days_without_sex, const int day)
@@ -107,11 +107,12 @@ void init_larva (Cockroach *swarm, const int idx, const int idx_parent_1, const 
 		.time_for_reproduction = false,
 		.last_reproduction_day = birthday, // no reproduction yet
 		.mode = Walking,
-				.food_attraction = rand_a_b(0, 100), // entre 0 et 100 
+/* 				.food_attraction = rand_a_b(0, 100), // entre 0 et 100 
 				.light_sensitivity = rand_a_b(0, 100) ,
-				.life = 100 
+				.life = 100  */
 	};
 }
+
 
 void createLarva(Cockroach **swarm, int idx_parent_1, int idx_parent_2, int *swarmSize, const int birthday)
 {
@@ -119,9 +120,11 @@ void createLarva(Cockroach **swarm, int idx_parent_1, int idx_parent_2, int *swa
     (*swarm) = (Cockroach *)realloc((*swarm), (*swarmSize) * sizeof(Cockroach));// realloc with swarmSize+1
     // now init new larva values
     int new_id = find_new_id(*swarm, *swarmSize);
-    init_larva((*swarm),(*swarmSize)-1,idx_parent_1,idx_parent_2,birthday,new_id);
-
-
+    int idx_larva = (*swarmSize)-1;
+    init_larva((*swarm),idx_larva,idx_parent_1,idx_parent_2,birthday,new_id);
+    genetic_evolution(*swarm,idx_larva,idx_parent_1,idx_parent_2);
+    printf("larva: life = %f, fodd attraction = %f, light sensitive = %f\n", 
+        (*swarm)[idx_larva].life, (*swarm)[idx_larva].food_attraction,(*swarm)[idx_larva].light_sensitivity);
 }
 
 

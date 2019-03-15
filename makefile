@@ -20,13 +20,13 @@ $(TARGET).o: $(TARGET).c GfxLib.h ESLib.h definitions.h positionFood.h evolution
 positionFood.o: positionFood.c GfxLib.h definitions.h positionFood.h
 	gcc $(CFLAGS) $<
 
-evolution.o: evolution.c definitions.h evolution.h
+evolution.o: evolution.c ESLib.h definitions.h evolution.h
 	$(CC) $(CFLAGS) $< 
 
 time.o: time.c GfxLib.h definitions.h time.h
 	$(CC) $(CFLAGS) $< 
 
-reproduction.o: reproduction.c definitions.h reproduction.h
+reproduction.o: reproduction.c ESLib.h definitions.h reproduction.h evolution.h
 	$(CC) $(CFLAGS) $< 
 
 # isen libs ------------------------------------

@@ -235,32 +235,31 @@ void updateSwarm(Cockroach **swarm, int *swarmSize, int lightAbscissa, int light
 					}
 					{
 						// Rule 6: walk when detect light while eating
-                          const double deltaX = lightAbscissa-(*swarm)[i].x;
-                          const double deltaY = lightOrdinate-(*swarm)[i].y;
-                          const double hypotenuse = hypot(deltaX, deltaY);
-                      	  POINT* light = currentLight((*swarm)[i], nb_lightPoints, lightPoints);
-                      
-                     	  if ((lightAbscissa >= 0 && lightOrdinate >= 0 && hypotenuse < lightBubble) || (light != NULL)) {
-                          {
-                              if (valorisation((*swarm)[i]) > ValorisationLight)
-                              {
-                                  (*swarm)[i].mode = Walking; // escape light
-                              }
-                              else // more attracted by food
-                              {
-                                  if (rand_a_b(0, 1000) <= ProbaPredateurEating)
-                                  {
-                                      printf("hey number %d died because of PREDATOR while eating\n", i);
-                                      adios((*swarm), swarmSize, i); //death of little cockroach
-                                      if(*swarmSize == 0)
-                                      {
-                                          printf("Everybody died... :(\n");
-                                          exit(0);
-                                      }
-                                      continue; //We need to avoid using i after the realloc, we can have error if we are at the end of an array ! 
-                                  }
-                              }
-                          }
+						const double deltaX = lightAbscissa-(*swarm)[i].x;
+						const double deltaY = lightOrdinate-(*swarm)[i].y;
+						const double hypotenuse = hypot(deltaX, deltaY);
+						POINT* light = currentLight((*swarm)[i], nb_lightPoints, lightPoints);
+
+						if ((lightAbscissa >= 0 && lightOrdinate >= 0 && hypotenuse < lightBubble) || (light != NULL)) {
+						{
+							if (valorisation((*swarm)[i]) > ValorisationLight)
+							{
+									(*swarm)[i].mode = Walking; // escape light
+							}
+							else // more attracted by food
+							{
+								if (rand_a_b(0, 1000) <= ProbaPredateurEating)
+								{
+									printf("hey number %d died because of PREDATOR while eating\n", i);
+									adios((*swarm), swarmSize, i); //death of little cockroach
+									if(*swarmSize == 0)
+									{
+										printf("Everybody died... :(\n");
+										exit(0);
+									}
+								}
+							}
+						}
 					}
 				}
 				break;
