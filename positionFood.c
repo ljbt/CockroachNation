@@ -35,7 +35,7 @@ POINT positionLightArea(void)
     POINT lightPoint;
     lightPoint.x = rand_a_b(0,WindowWidth);
     lightPoint.y = rand_a_b(0,WindowHeight);
-    lightPoint.rayon = rand_a_b(30, 80);
+    lightPoint.rayon = rand_a_b(50, 100);
   	lightPoint.time = rand_a_b(500, 1000);
     return lightPoint;
 }

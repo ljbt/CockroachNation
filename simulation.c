@@ -26,6 +26,8 @@ const double lightBubble = 50.;		// A minimal distance with the light
 const double foodBubble = 50.;		// food area distance
 const int nb_max_foodPoints = 5;
 const int nb_max_lightPoints = 6;
+const int nb_min_foodPoints = 5;
+const int nb_min_lightPoints = 6;
 const double WeightOfFoodApproach = .3;
 const double WeightOflightEscape = .8;
 const double MinDistanceFromBoxEdges = 1.;// A minimal distance with the edges of the box
@@ -538,6 +540,13 @@ int main(int argc, char *argv[]) {
 
 
 void gestionEvenement(EvenementGfx event) {
+	double s1Eat = 0.0;
+	double s2Eat = 0.0;
+	double s1Light = 0.0;
+	double s2Light = 0.0;
+	double s1Life = 0.0;
+	double s2Life = 0.0;
+
 	static Cockroach *cockroach = NULL;
 	static bool displaylight = false;
 	static int lightAbscissa = -1;
@@ -591,10 +600,38 @@ void gestionEvenement(EvenementGfx event) {
 			break;
 
 		case Clavier:
+			
 			switch (caractereClavier()) {
-				case 'Q':
-				case 'q':
-					exit(0);
+				case 'S':
+				case 's':
+					
+					for (int i=0; i<NumberOfCockroachs; i++)
+					{
+						s1Eat = s1Eat + cockroach[i].food_attraction;
+						s2Eat = s2Eat + cockroach[i].food_attraction*cockroach[i].food_attraction;
+						s1Light = s1Light + cockroach[i].light_sensitivity;
+						s2Light = s2Light + cockroach[i].light_sensitivity*cockroach[i].light_sensitivity;
+						s1Life = s1Life + cockroach[i].life;
+						s2Life = s2Life + cockroach[i].life*cockroach[i].life;
+					}
+					double avgEat = s1Eat/NumberOfCockroachs;
+					double varianceEat = s2Eat/NumberOfCockroachs - avgEat*avgEat;
+					double sdEat = sqrt(varianceEat);
+					
+					double avgLight = s1Light/NumberOfCockroachs;
+					double varianceLight = s2Light/NumberOfCockroachs - avgLight*avgLight;
+					double sdLight = sqrt(varianceLight);
+					
+					double avgLife = s1Life/NumberOfCockroachs;
+					double varianceLife = s2Life/NumberOfCockroachs - avgLife*avgLife;
+					double sdLife = sqrt(varianceLife);
+					
+					printf("\n********** Stats Day %d : ********** \n", day);
+					printf("Food attraction ==> Average : %.1f, Variance : %.1f, Standard Deviation : %.1f\n", avgEat, varianceEat, sdEat);
+					printf("Light sensitivity ==> Average : %.1f, Variance : %.1f, Standard Deviation : %.1f\n", avgLight, varianceLight, sdLight);
+					printf("Life point ==> Average : %.1f, Variance : %.1f, Standard Deviation : %.1f\n", avgLife, varianceLife, sdLife);
+					printf("********** End of Stats : ********** \n");
+					
 					break;
 				case 'R':
 				case 'r':
@@ -602,8 +639,13 @@ void gestionEvenement(EvenementGfx event) {
 					cockroach = initializeSwarm(NumberOfCockroachs);
 					day = 1;
 					break;
+				case 'q':
+				case 'Q':
+					termineBoucleEvenements();
+				
 			}
 			break;
+
 
 		case BoutonSouris:
 			if (etatBoutonSouris() == GaucheAppuye)
