@@ -181,7 +181,6 @@ void displaySwarm(const Cockroach *swarm, int swarmSize)
 void updateSwarm(Cockroach **swarm, int *swarmSize, int lightAbscissa, int lightOrdinate, int nb_foodPoints, POINT *foodPoints, int nb_lightPoints, POINT* lightPoints, const int day) {
 
 	for (int i = 0; i < *swarmSize; ++i) {	// All the individuals
-
 		bool possiblePartner = false;
 		int i_close_partner = -1;
 		double hypothenuse_close_partner = -1;
@@ -257,6 +256,7 @@ void updateSwarm(Cockroach **swarm, int *swarmSize, int lightAbscissa, int light
 										printf("Everybody died... :(\n");
 										exit(0);
 									}
+									continue;
 								}
 							}
 						}
@@ -463,6 +463,7 @@ void updateSwarm(Cockroach **swarm, int *swarmSize, int lightAbscissa, int light
 						printf("Everybody died... :(\n");
 						exit(0);	
 					}
+					continue;		 // actual insect died so we pass to the others 
 				}
 			}
 			{			

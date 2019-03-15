@@ -123,8 +123,8 @@ void createLarva(Cockroach **swarm, int idx_parent_1, int idx_parent_2, int *swa
     int idx_larva = (*swarmSize)-1;
     init_larva((*swarm),idx_larva,idx_parent_1,idx_parent_2,birthday,new_id);
     genetic_evolution(*swarm,idx_larva,idx_parent_1,idx_parent_2);
-    printf("larva: life = %f, fodd attraction = %f, light sensitive = %f\n", 
-        (*swarm)[idx_larva].life, (*swarm)[idx_larva].food_attraction,(*swarm)[idx_larva].light_sensitivity);
+/*     printf("larva: life = %f, fodd attraction = %f, light sensitive = %f\n", 
+        (*swarm)[idx_larva].life, (*swarm)[idx_larva].food_attraction,(*swarm)[idx_larva].light_sensitivity); */
 }
 
 
@@ -141,5 +141,7 @@ void reproduction (Cockroach **swarm, int idx_parent_1, int idx_parent_2, int *s
     for(int i = 0; i < nb_larva; i++)
     {
         createLarva(swarm,idx_parent_1,idx_parent_2,swarmSize, day);
+        printf("larva: life = %f, food attraction = %f, light sensitive = %f\n", 
+            (*swarm)[*swarmSize -1].life, (*swarm)[*swarmSize -1].food_attraction,(*swarm)[*swarmSize -1].light_sensitivity);
     }
  }
